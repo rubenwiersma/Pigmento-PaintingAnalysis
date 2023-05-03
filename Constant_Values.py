@@ -314,20 +314,17 @@ yellowtonerraw=np.array([
 
 yellowtonerraw=yellowtonerraw.reshape((-1,3))
 
-# print cie1931raw.shape
-# print Illuminantraw.shape
-# print cyantonerraw.shape
-# print magentatonerraw.shape
-# print yellowtonerraw.shape
-
-
-
+# print(cie1931raw.shape)
+# print(Illuminantraw.shape)
+# print(cyantonerraw.shape)
+# print(magentatonerraw.shape)
+# print(yellowtonerraw.shape)
 cie1931new=np.ones((cyantonerraw.shape[0],cie1931raw.shape[1]))
 Illuminantnew=np.ones((cyantonerraw.shape[0], Illuminantraw.shape[1]))
 cie1931new[:,0]=cyantonerraw[:,0]
 Illuminantnew[:,0]=cyantonerraw[:,0]
 k=0
-for i in xrange(len(cie1931raw)):
+for i in range(len(cie1931raw)):
     if cie1931raw[i,0]==cie1931new[k,0]: ###if same wavelength 
         cie1931new[k,:]=cie1931raw[i,:]
         Illuminantnew[k,:]=Illuminantraw[i,:]
@@ -335,16 +332,14 @@ for i in xrange(len(cie1931raw)):
     if k==len(cie1931new):
         break
 
-# print cie1931new
-# print Illuminantnew
-
-
+# print(cie1931new)
+# print(Illuminantnew)
 def sample_by_average_wavelength(raw, length): ### like 32 to 16, 8, 4
     L=raw.shape[0]
-    ratio=L/length
+    ratio=L//length
     samples=np.zeros((length, raw.shape[1]))
-    for i in xrange(len(samples)):
-        for j in xrange(ratio):
+    for i in range(len(samples)):
+        for j in range(ratio):
             samples[i]+=raw[i*ratio+j]
         samples[i]/=ratio
     return samples
@@ -355,9 +350,9 @@ def sample_by_interpolation(raw, length): #### like 16 to 14, 14 to 12, 12 to 10
     ratio=(L-1)*1.0/(length+1)
     samples=np.zeros((length, raw.shape[1]))
     j=1
-    for i in xrange(L-1):
+    for i in range(L-1):
         if (i<(ratio*j)) and ((ratio*j)<=(i+1)) and j<=length:
-#             print (ratio*j)
+#             print((ratio*j))
             samples[j-1]=raw[i]+((ratio*j)-i)*(raw[i+1]-raw[i])
             j+=1
     return samples
@@ -402,12 +397,9 @@ else:
     # cie1931new[:,1:]= np.identity(length2)
     # Illuminantnew=np.ones((length2,2))
 
-    # print "#####using wavelength number: ", len(cie1931new[:,1:])
-    # print cie1931new[:,1:]
-    # print Illuminantnew[:,1]
-
-
-
+    # print("#####using wavelength number: ", len(cie1931new[:,1:]))
+    # print(cie1931new[:,1:])
+    # print(Illuminantnew[:,1])
 #### cmf function
 R_xyzcoeff=cie1931new[:,1:].transpose()
 

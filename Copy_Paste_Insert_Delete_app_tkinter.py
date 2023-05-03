@@ -643,10 +643,9 @@ class Copy_Paste_Insert_Delete_app:
         self.mask=controller.mask
 
         if self.mask is None:
-            print "no input mask"
+            print("no input mask")
         else:
-            print self.mask.shape
-
+            print(self.mask.shape)
         self.AllData=controller.AllData
         
         self.canvas.pack(side="top", fill="both", expand=True)
@@ -828,14 +827,7 @@ class Copy_Paste_Insert_Delete_app:
                 self.var_list['p-'+str(i)].set(0)
 
         self.user_select_indices=np.asarray([self.var_list['p-'+str(i)].get() for i in range(self.PigNum)])
-        # print self.user_select_indices
-
-
-
-
-
-
-
+        # print(self.user_select_indices)
     def Reset(self):
         self.img2=np.asarray(self.im)
         self.Show_image(self.master, self.im, option=1)
@@ -876,7 +868,7 @@ class Copy_Paste_Insert_Delete_app:
     def Show_image(self, master, img, option=0):
         
         width,height=img.size
-        # print width, height
+        # print(width, height)
         if option==0:
             self.canvas = tk.Canvas(master, width=width, height=height, highlightthickness=0, borderwidth=0, cursor="cross")
             self.canvas.pack(side="top", fill="both", expand=True)
@@ -889,14 +881,12 @@ class Copy_Paste_Insert_Delete_app:
 
 
         chosed_indices=np.nonzero(self.user_select_indices)[0]
-        # print chosed_indices
+        # print(chosed_indices)
         imsize=self.img2.shape[:-1]
 
         ### KM version
         if self.var3.get()==0:
-            # print "KM version"
-
-
+            # print("KM version")
             ### object insertion
             if self.var2.get()==1:
                 
@@ -964,8 +954,7 @@ class Copy_Paste_Insert_Delete_app:
  
         ###PD version
         elif self.var3.get()==1: 
-            # print "PD version"
-
+            # print("PD version")
             ### object insertion
             if self.var2.get()==1: 
 

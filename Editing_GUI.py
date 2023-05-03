@@ -75,7 +75,7 @@ class Main_app:
     def Show_image(self, img, option=0):
         self.master.title('Main window')
         width,height=img.size
-        # print width, height
+        # print(width, height)
         if option==0:
             self.canvas = tk.Canvas(self.master, width=width, height=height, highlightthickness=0, borderwidth=0, cursor="cross")
             self.canvas.pack(side="top", fill="both", expand=True)
@@ -91,9 +91,7 @@ class Main_app:
         self.Show_image(self.im, option=1)
 
     def About(self):
-        print "####"
-
-
+        print("####")
     class AllData():  ### to collect all datas.
         def __init__(self):
             self.KM_pigments=None
@@ -111,8 +109,8 @@ class Main_app:
     def OpenFile(self): #### open a processed image and all other files together.
         self.name = askopenfilename()
         self.directory=os.path.split(self.name)[0]
-        print self.name
-        print self.directory
+        print(self.name)
+        print(self.directory)
         self.im=Image.open(self.name).convert('RGB')
         self.img2=np.asarray(self.im)
 
@@ -134,22 +132,17 @@ class Main_app:
         self.OpenFile6()
         self.OpenFile7()
 
-        print "Finish loading all data!"
-        
-
+        print("Finish loading all data!")
     def OpenFile0(self):
         name=self.directory+"/order1.txt"
         self.AllData.Pig_order=np.loadtxt(name).astype(np.uint8)
         self.PigNum=len(self.AllData.Pig_order)
-        print self.PigNum
-        print self.AllData.Pig_order
-        
-
-
+        print(self.PigNum)
+        print(self.AllData.Pig_order)
     def OpenFile1(self):
         name=self.path_prefix+"-"+str(self.PigNum)+"-primary_pigments_KS.txt" 
         self.AllData.KM_pigments=np.loadtxt(name)
-        print self.AllData.KM_pigments.shape
+        print(self.AllData.KM_pigments.shape)
         self.AllData.KM_pigments=self.AllData.KM_pigments[self.AllData.Pig_order, :] ### reorder
 
         
@@ -169,7 +162,7 @@ class Main_app:
             name=self.path_prefix+"-"+str(self.PigNum)+"-KM_mixing-weights_map-%02d.png"%i
             self.AllData.KM_weights[:,:,i]=np.asarray(Image.open(name).convert('L'))/255.0
         
-        print self.AllData.KM_weights.shape
+        print(self.AllData.KM_weights.shape)
         self.AllData.KM_weights=self.AllData.KM_weights[:,:,self.AllData.Pig_order] ### reorder 
 
 
@@ -187,14 +180,12 @@ class Main_app:
             self.AllData.KM_thickness[:,:,i]=np.asarray(Image.open(name).convert('L'))/255.0
 
         self.AllData.KM_thickness+=1e-11
-        print self.AllData.KM_thickness.shape
-
-    
+        print(self.AllData.KM_thickness.shape)
     def OpenFile4(self):
         name=self.path_prefix+"-"+str(self.PigNum)+"-primary_pigments_RGB_color.js" 
         with open(name) as myfile:
             self.AllData.PD_vertices=np.asarray(json.load(myfile)['vs'])
-        print self.AllData.PD_vertices.shape
+        print(self.AllData.PD_vertices.shape)
         self.AllData.PD_vertices=self.AllData.PD_vertices[self.AllData.Pig_order, :] ### reorder 
 
 
@@ -214,7 +205,7 @@ class Main_app:
             name=self.path_prefix+"-"+str(self.PigNum)+"-PD_mixing-weights_map-%02d.png"%i
             self.AllData.PD_weights[:,:,i]=np.asarray(Image.open(name).convert('L'))/255.0
 
-        print self.AllData.PD_weights.shape
+        print(self.AllData.PD_weights.shape)
         self.AllData.PD_weights=self.AllData.PD_weights[:,:,self.AllData.Pig_order] ### reorder 
 
 
@@ -232,23 +223,11 @@ class Main_app:
             self.AllData.PD_opacities[:,:,i]=np.asarray(Image.open(name).convert('L'))/255.0
 
 
-        print self.AllData.PD_opacities.shape
-
-
+        print(self.AllData.PD_opacities.shape)
     def OpenFile7(self):
         name=self.directory+"/Existing_KS_parameter_KS.txt"
         self.AllData.Existing_KS=np.loadtxt(name)
-        print self.AllData.Existing_KS.shape 
-
-
-
-  
-
-
-
-
-
-
+        print(self.AllData.Existing_KS.shape)
     def Grabcut(self):
         global grabcut_app
         grabcut_app=Grabcut_app(self)        

@@ -17,7 +17,7 @@ if use_autograd==True:
     import autograd.numpy as np
     from autograd import elementwise_grad, jacobian
     def jit(f):
-        # print "###"
+        # print("###")
         return f
 else:
     from numpy import *
@@ -149,7 +149,7 @@ def gradient_objective_func_fixed_KS(x0, arr, H, Smooth_Matrix, W_w=2.0, W_spars
 
 
 def optimize(arr, x0, H, Smooth_Matrix, saver=None, W_w=2.0, W_sparse=0.1, W_spatial=0.0, method='L-BFGS-B', W_neighbors=0.0, neighbors=None):
-    # print type(x0)
+    # print(type(x0))
     arr_shape=arr.shape
     N=arr_shape[0]*arr_shape[1]
     M=len(x0)/N
@@ -159,7 +159,7 @@ def optimize(arr, x0, H, Smooth_Matrix, saver=None, W_w=2.0, W_sparse=0.1, W_spa
     #### bounds0 are for least_squares function parameters.
     bounds0=(lb, ub)
     bounds3=[]
-    for i in xrange(len(x0)):
+    for i in range(len(x0)):
         bounds3.append((lb,ub))
     
 
@@ -174,11 +174,11 @@ def optimize(arr, x0, H, Smooth_Matrix, saver=None, W_w=2.0, W_sparse=0.1, W_spa
         if use_autograd==False:
             res=sopt.minimize(objective_func_fixed_KS, x0, args=(arr, H, Smooth_Matrix, W_w, W_sparse, W_spatial, W_neighbors, neighbors), bounds=bounds3, method=method, callback=saver)
         else:
-            # print 'this'
+            # print('this')
             res=sopt.minimize(objective_func_fixed_KS, x0, args=(arr, H, Smooth_Matrix, W_w, W_sparse, W_spatial, W_neighbors, neighbors), bounds=bounds3, method=method, jac=gradient_objective_func_fixed_KS, callback=saver,options={'gtol':1e-4, 'ftol': 1e-4})
 
     end_time=time.clock()
-    # print 'Optimize variables of size ', x0.shape, ' took ', (end_time-start_time), ' seconds.'
+    # print('Optimize variables of size ', x0.shape, ' took ', (end_time-start_time), ' seconds.')
     x=res["x"]
 
 
@@ -198,10 +198,8 @@ def save_layers(x0, arr, H, output_prefix):
     Thickness=x0.reshape((N,M))
     K0=H[:,:L]
     S0=H[:,L:]
-    print Thickness.sum(axis=1).min()
-    print Thickness.sum(axis=1).max()
-
-   
+    print(Thickness.sum(axis=1).min())
+    print(Thickness.sum(axis=1).max())
     R_vector=np.ones((N,L))
     for i in range(M):
         R_vector=equations_in_RealPigments(K0[i:i+1,:], S0[i:i+1,:], r=R_vector, h=Thickness[:,i:i+1])
@@ -214,8 +212,7 @@ def save_layers(x0, arr, H, output_prefix):
     R_rgb=np.dot(xyztorgb,R_xyz.transpose()).transpose() ###linear rgb value, shape is N*3
     R_rgb=Gamma_trans_img(R_rgb.clip(0,1)) ##clip and gamma correction
     
-    print 'RGB RMSE: ', np.sqrt(np.square(255*(arr.reshape((-1,3))-R_rgb)).sum()/N)
-    
+    print('RGB RMSE: ', np.sqrt(np.square(255*(arr.reshape((-1,3))-R_rgb)).sum()/N))
     filename=output_prefix+"-fixed_KS-reconstructed.png"
     plt.imsave(filename,(R_rgb.reshape(original_shape)*255.0).clip(0,255).round().astype(np.uint8))
     np.savetxt(output_prefix+"-thickness.txt", Thickness)
@@ -231,17 +228,17 @@ def save_layers(x0, arr, H, output_prefix):
     ### compute sparsity
     sparsity_thres_array=np.array([0.000001, 0.00001, 0.0001,0.001,0.01,0.1])
     Thickness_sparsity_list=np.ones(len(sparsity_thres_array))
-    for thres_ind in xrange(len(sparsity_thres_array)):
+    for thres_ind in range(len(sparsity_thres_array)):
         Thickness_sparsity_list[thres_ind]=len(Thickness[Thickness<=sparsity_thres_array[thres_ind]])*1.0/(N*M)
     
-    print "Thickness_sparsity_list: ", Thickness_sparsity_list
+    print("Thickness_sparsity_list: ", Thickness_sparsity_list)
     np.savetxt(output_prefix+"-Thickness-Sparsity.txt", Thickness_sparsity_list)
 
 
 
     # normalized_Thickness=Thickness/Thickness.sum(axis=1).reshape((-1,1))
 
-    # for i in xrange(M):
+    # for i in range(M):
     #     #### save normalized_weights_map for each pigment.
     #     normalized_thickness_map_name=output_prefix+"-normalized_thickness_map-%02d.png" % i
     #     normalized_thickness_map=normalized_Thickness[:,i].reshape(img_size).copy()
@@ -256,12 +253,12 @@ def save_layers(x0, arr, H, output_prefix):
     Image.fromarray((Thickness_sum_map*255.0).round().astype(np.uint8)).save(output_prefix+"-thickness_sum_map-min-"+str(T_min)+"-max-"+str(T_max)+".png")
     
 
-    for i in xrange(M):
+    for i in range(M):
         thickness_map_name=output_prefix+"-layer_thickness_map-%02d.png" % i
         Thickness_map=Thickness[:,i].reshape(img_size).copy()
         Large_than_one=len(Thickness_map[Thickness_map>1.0])
         if Large_than_one>0:
-            print "Number of Thickness value that is larger than 1.0 is : ", Large_than_one
+            print("Number of Thickness value that is larger than 1.0 is : ", Large_than_one)
         Image.fromarray((Thickness_map*255.0).clip(0,255).round().astype(np.uint8)).save(thickness_map_name)
         
         ####save for application
@@ -281,9 +278,8 @@ def save_layers_2(x0, arr_shape, H, output_prefix):
     Thickness=x0.reshape((N,M))
     K0=H[:,:L]
     S0=H[:,L:]
-    print Thickness.sum(axis=1).min()
-    print Thickness.sum(axis=1).max()
-
+    print(Thickness.sum(axis=1).min())
+    print(Thickness.sum(axis=1).max())
     R_vector=np.ones((N,L))
     for i in range(M):
         R_vector=equations_in_RealPigments(K0[i:i+1,:], S0[i:i+1,:], r=R_vector, h=Thickness[:,i:i+1])
@@ -296,17 +292,16 @@ def save_layers_2(x0, arr_shape, H, output_prefix):
     R_rgb=np.dot(xyztorgb,R_xyz.transpose()).transpose() ###linear rgb value, shape is N*3
     R_rgb=Gamma_trans_img(R_rgb.clip(0,1)) ##clip and gamma correction
     
-    # print 'RGB RMSE: ', np.sqrt(np.square(255*(arr.reshape((-1,3))-R_rgb)).sum()/N)
-    
+    # print('RGB RMSE: ', np.sqrt(np.square(255*(arr.reshape((-1,3))-R_rgb)).sum()/N))
     filename=output_prefix+"-fixed_KS-reconstructed.png"
     plt.imsave(filename,(R_rgb.reshape(original_shape)*255.0).clip(0,255).round().astype(np.uint8))
 
-    for i in xrange(M):
+    for i in range(M):
         thickness_map_name=output_prefix+"-layer_thickness_map-%02d.png" % i
         Thickness_map=Thickness[:,i].reshape(img_size).copy()
         Large_than_one=len(Thickness_map[Thickness_map>1.0])
         if Large_than_one>0:
-            print "Number of Thickness value that is larger than 1.0 is : ", Large_than_one
+            print("Number of Thickness value that is larger than 1.0 is : ", Large_than_one)
         Image.fromarray((Thickness_map*255.0).clip(0,255).round().astype(np.uint8)).save(thickness_map_name)
 
 
@@ -364,32 +359,28 @@ if __name__=="__main__":
     KS_file_name=sys.argv[2]
     Thickness_file_name=sys.argv[3]
     output_prefix=sys.argv[4]
-    W_w=np.float(sys.argv[5])
-    W_sparse=np.float(sys.argv[6])
-    print 'W_sparse',W_sparse
-    solve_choice=np.int(sys.argv[7])
-    W_spatial=np.float(sys.argv[8])
-    print 'W_spatial',W_spatial
-
-
+    W_w=np.float64(sys.argv[5])
+    W_sparse=np.float64(sys.argv[6])
+    print('W_sparse',W_sparse)
+    solve_choice=np.int32(sys.argv[7])
+    W_spatial=np.float64(sys.argv[8])
+    print('W_spatial',W_spatial)
     global save_for_application_path_prefix
     save_for_application_path_prefix="./Application_Files/"
 
 
     W_neighbors=0.0
     if solve_choice==3 or solve_choice==6 : #### solve per pixel with neighborhood info constraints
-        W_neighbors=np.float(sys.argv[9])
+        W_neighbors=np.float64(sys.argv[9])
 
-    print 'W_neighbors',W_neighbors
-    
-
+    print('W_neighbors',W_neighbors)
     START=time.time()
 
     img=np.asarray(Image.open(img_file).convert('RGB'))
     arr=img.copy()/255.0
 
     H=np.loadtxt(KS_file_name)
-    print H.shape
+    print(H.shape)
     eps=1e-15
 
 
@@ -405,10 +396,9 @@ if __name__=="__main__":
     else:
         Thickness=np.loadtxt(Thickness_file_name)
         Thickness=Thickness.reshape((arr.shape[0],arr.shape[1],M))
-        print Thickness.shape
-
+        print(Thickness.shape)
         initial_error= objective_func_vector_fixed_KS(Thickness.reshape(-1), arr, H, None, W_w=0.0, W_sparse=0.0,W_spatial=0.0,W_neighbors=0.0, neighbors=None)
-        print 'initial_error: ', np.sqrt(np.square(initial_error*255.0).sum()/N)
+        print('initial_error: ', np.sqrt(np.square(initial_error*255.0).sum()/N))
         initial_recover=initial_error.reshape((-1,3))+arr.reshape((-1,3))
         plt.imsave(output_prefix+"-initial_recover.png",(initial_recover.reshape(original_shape)*255.0).clip(0,255).round().astype(np.uint8))
 
@@ -430,7 +420,7 @@ if __name__=="__main__":
         now = time.clock()
         ## Save every 10 seconds!
         if now - last_save[1] > kSaveEverySeconds:
-            print 'Iteration', last_save[0]
+            print('Iteration', last_save[0])
             save_layers_2(xk, arr_shape, H, output_prefix)
             ## Get the time again instead of using 'now', because that doesn't take into
             ## account the time to actually save the images, which is a lot for large images.
@@ -465,8 +455,7 @@ if __name__=="__main__":
         
 
         ## solve on the downsampled problem
-        print '==> Optimizing on a smaller image:', small_arr.shape, 'instead of', large_arr.shape
-        
+        print('==> Optimizing on a smaller image:', small_arr.shape, 'instead of', large_arr.shape)
         arr_shape=(small_arr.shape[0],small_arr.shape[1])
 
         
@@ -482,18 +471,14 @@ if __name__=="__main__":
             Smooth_Matrix=Blf
 
         else:
-            print "Error! No such choice!"
-
-
-
+            print("Error! No such choice!")
         time1=time.time()
-        print "compute smooth matrix time: ", time1-time0
-
+        print("compute smooth matrix time: ", time1-time0)
         reset_saver(small_arr.shape)
         small_Y = optimize(small_arr, small_Y1, H, Smooth_Matrix, saver=saver, W_w=W_w, W_sparse=W_sparse, W_spatial=W_spatial, method='L-BFGS-B')
         saver(small_Y.reshape(-1))
         time2=time.time()
-        print 'this level use time: ', time2-time1
+        print('this level use time: ', time2-time1)
         # save_layers(small_Y.reshape(-1), small_arr, H, output_prefix+"-recursivelevel-"+str(level))
 
         level+=1
@@ -517,8 +502,7 @@ if __name__=="__main__":
 
     if solve_choice==0: 
                         
-        print 'choice: ', solve_choice
-        
+        print('choice: ', solve_choice)
         smooth_choice=sys.argv[10]
         recursive_choice=sys.argv[11]
 
@@ -528,8 +512,7 @@ if __name__=="__main__":
         if order_file_name!=None:
             order=np.loadtxt(order_file_name)
             order=order.astype(np.uint8)
-            print 'order', order
-            
+            print('order', order)
             ### save for application
             np.savetxt(save_for_application_path_prefix+order_file_name, order)
 
@@ -558,10 +541,8 @@ if __name__=="__main__":
 
 
 
-        print 'smooth_choice: ',smooth_choice
-        print 'recursive_choice: ',recursive_choice
-
-
+        print('smooth_choice: ',smooth_choice)
+        print('recursive_choice: ',recursive_choice)
         if recursive_choice=='Yes':
             level=0
             x0, level=optimize_smaller_whole(arr, x0.reshape(-1), level, smooth_choice)
@@ -584,22 +565,12 @@ if __name__=="__main__":
             Blf=create_cross_bilateral(arr*255.0, M)
             Smooth_Matrix=Blf
         else:
-            print "Error! No such choice combination!"
-
-
+            print("Error! No such choice combination!")
         time1=time.time()
-        print "compute smooth matrix time: ", time1-time0
-
+        print("compute smooth matrix time: ", time1-time0)
         x0 = optimize( arr, x0.reshape(-1), H, Smooth_Matrix, saver=saver, W_w=W_w, W_sparse=W_sparse, W_spatial=W_spatial, method='L-BFGS-B')
         save_layers(x0, arr, H, output_prefix+"-final_recursivelevel-")
         time2=time.time()
-        print "final level use time: ", time2-time1
-        
-
-
+        print("final level use time: ", time2-time1)
     END=time.time()
-    print 'total time: ', (END-START)
-    
-
-    
-    
+    print('total time: ', (END-START))

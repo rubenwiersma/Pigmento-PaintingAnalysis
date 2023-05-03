@@ -15,7 +15,7 @@ if use_autograd==True:
     import autograd.numpy as np
     from autograd import elementwise_grad, jacobian
     def jit(f):
-        # print "###"
+        # print("###")
         return f
 else:
     from numpy import *
@@ -37,7 +37,7 @@ def Gamma_trans(C_linear):
 
 @jit
 def Gamma_trans_img1(RGB_linear_img):
-    # print "#1"
+    # print("#1")
     thres=0.0031308
     out=np.ones(RGB_linear_img.shape)
     out[RGB_linear_img<=thres]=12.92* RGB_linear_img[RGB_linear_img<=thres]
@@ -49,7 +49,7 @@ def Gamma_trans_img1(RGB_linear_img):
 
 @jit
 def Gamma_trans_img2(RGB_linear_img):
-    # print "#2"
+    # print("#2")
     return RGB_linear_img #### for comparing autograd and without autograd.
 
 ## new version, very slow!
@@ -63,7 +63,7 @@ def Gamma_trans_img2(RGB_linear_img):
 # #### new version, a little error here.
 @jit
 def Gamma_trans_img3(RGB_linear_img):
-    # print "#3"
+    # print("#3")
     eps=1e-50
     RGB_linear_img=RGB_linear_img.clip(eps,1.0)
     thres=0.0031308
@@ -84,8 +84,8 @@ def Gamma_trans_img3(RGB_linear_img):
 
 @jit
 def mycoth(x, eps=1e-16):
-    # print x.shape
-    # print type(x)
+    # print(x.shape)
+    # print(type(x))
     x=np.maximum(x, eps) ## if x is too small, for example 1e-17, then will cause divide by zero error.
     ex = np.exp(2*x)
     return (ex+1.0)/(ex-1.0)
@@ -109,7 +109,7 @@ def equations_in_RealPigments(K,S,r,h, eps=1e-8, model='normal'): ## r is substr
     elif model=='infinite':
         R=a-b
     else:
-        print 'wrong option!'
+        print('wrong option!')
     return R
 
 
@@ -237,8 +237,7 @@ def KM_mixing_multiplepigments(K_vector, S_vector, weights, r=1.0, h=1.0, model=
 
 # #     for thickness in np.logspace(start, end, num=Num, base=10):
 # #         R_layering.append(PigmentOnWhite(K,S,thickness,Illuminantnew,Normalize,R_rgbcoeff))
-# #     print R_layering[0], R_layering[-1]
-
+# #     print(R_layering[0], R_layering[-1])
 # #     R_layering=(R_layering*SCALE).clip(0,1) ## scale exposure and clip
 # #     img_layering=np.ones((50,1,3))*np.array(R_layering).reshape((1,Num,3))
 # #     results=Gamma_trans_img(img_layering) ### gamma correction from linear RGB to be sRGB
@@ -257,22 +256,17 @@ if __name__ == '__main__':
     # from autograd import grad
     # gradf = grad(f)
     # g = gradf( np.linspace( 1,2, 1600 ) )
-    # print(g)
-
+    # print((g))
     from autograd import grad, jacobian
     
     # initial=np.zeros(5)
     initial= np.random.random_sample(5)
-    print initial
-
-
+    print(initial)
     Jac1 = jacobian(Gamma_trans_img)
     j1 = Jac1(initial)
-    print j1
-
+    print(j1)
     Jac2 = jacobian(Gamma_trans_img2)
     j2 = Jac2(initial)
     
-    print j2
-    print abs(j1-j2).sum()
-
+    print(j2)
+    print(abs(j1-j2).sum())

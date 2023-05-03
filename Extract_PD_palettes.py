@@ -17,7 +17,7 @@ def make_sure_path_exists(path):
 if __name__=="__main__":
 
     img_file=sys.argv[1]
-    M=np.int(sys.argv[2])
+    M=np.int32(sys.argv[2])
     foldername=sys.argv[3]
 
     current_folder="."+foldername+"/" 
@@ -51,8 +51,7 @@ if __name__=="__main__":
     Hull_vertices=Final_hull.points[Final_hull.vertices].clip(0,255)
     Hull_vertices=Hull_vertices.round().astype(np.uint8)
 
-    print Hull_vertices
-
+    print(Hull_vertices)
     import json
     with open (output_prefix+"-PD_palettes.js", "w") as myfile:
     	json.dump({"vs":Hull_vertices.reshape((-1,3)).tolist()}, myfile)

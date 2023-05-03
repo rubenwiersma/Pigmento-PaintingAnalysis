@@ -136,7 +136,7 @@ class Local_Alpha_Matting_app:
     def Show_image(self, master, img, option=0):
         
         width,height=img.size
-        # print width, height
+        # print(width, height)
         if option==0:
             self.canvas = tk.Canvas(master, width=width, height=height, highlightthickness=0, borderwidth=0, cursor="cross")
             self.canvas.pack(side="top", fill="both", expand=True)

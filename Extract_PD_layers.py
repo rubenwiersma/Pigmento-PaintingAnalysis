@@ -173,14 +173,14 @@ def gen_energy_and_gradient( img, layer_colors, weights, img_spatial_static_targ
         Yspatial_static_target = img_spatial_static_target.ravel()
     
     if 'w_spatial_dynamic' in weights:
-        # print 'Preparing a Laplacian matrix for E_spatial_dynamic...'
+        # print('Preparing a Laplacian matrix for E_spatial_dynamic...')
         import fast_energy_laplacian
         import scipy.sparse
-        # print '    Generating L...'
+        # print('    Generating L...')
         LTL = fast_energy_laplacian.gen_grid_laplacian( img.shape[0], img.shape[1] )
-        # print '    Computing L.T*L...'
+        # print('    Computing L.T*L...')
         # LTL = LTL.T * LTL
-        # print '    Replicating L.T*L for all layers...'
+        # print('    Replicating L.T*L for all layers...')
         ## Now repeat LTL #layers times.
         ## Because the layer values are the innermost dimension,
         ## every entry (i,j, val) in LTL should be repeated
@@ -220,8 +220,7 @@ def gen_energy_and_gradient( img, layer_colors, weights, img_spatial_static_targ
         vals = ( repeat( asarray( LTL.data ).reshape( LTL.nnz, 1 ), num_layers, 1 ) ).ravel()
         
         LTL = scipy.sparse.coo_matrix( ( vals, ( rows, cols ) ), shape = ( shape[0]*num_layers, shape[1]*num_layers ) ).tocsr()
-        # print '...Finished.'
-    
+        # print('...Finished.')
     if scratches is None:
         scratches = {}
     
@@ -240,9 +239,8 @@ def gen_energy_and_gradient( img, layer_colors, weights, img_spatial_static_targ
         if 'w_spatial_dynamic' in weights:
             e += weights['w_spatial_dynamic'] * E_spatial_dynamic( Y, LTL, scratches )
         
-        # print 'Y:', Y
-        # print 'e:', e
-        
+        # print('Y:', Y)
+        # print('e:', e)
         return e
     
     ## Preallocate this memory
@@ -276,9 +274,8 @@ def gen_energy_and_gradient( img, layer_colors, weights, img_spatial_static_targ
             gradient_term *= weights['w_spatial_dynamic']
             total_gradient += gradient_term
         
-        # print 'Y:', Y
-        # print 'total_gradient:', total_gradient
-        
+        # print('Y:', Y)
+        # print('total_gradient:', total_gradient)
         return total_gradient
     
     return e, g
@@ -329,7 +326,7 @@ def optimize( arr, colors, Y0, weights, img_spatial_static_target = None, scratc
         
         if saver is not None: saver( xk )
     
-    # print 'Optimizing...'
+    # print('Optimizing...')
     # start = time.clock()
     
     try:
@@ -347,22 +344,20 @@ def optimize( arr, colors, Y0, weights, img_spatial_static_target = None, scratc
     
     except KeyboardInterrupt:
         ## If the user 
-        print 'KeyboardInterrupt after %d iterations!' % Ysofar[0]
+        print('KeyboardInterrupt after %d iterations!' % Ysofar[0])
         Y = Ysofar[1]
         ## Y will be None if we didn't make it through 1 iteration before a KeyboardInterrupt.
         if Y is None:
             Y = -31337*ones( ( arr.shape[0], arr.shape[1], len( colors )-1 ) )
     
     else:
-        # print opt_result
+        # print(opt_result)
         Y = opt_result.x
     
     # duration = time.clock() - start
-    # print '...Finished optimizing in %.3f seconds.' % duration
-    
+    # print('...Finished optimizing in %.3f seconds.' % duration)
     end = time.clock()
-    print 'Optimize an image of size ', Y.shape, ' took ', (end-start), ' seconds.'
-
+    print('Optimize an image of size ', Y.shape, ' took ', (end-start), ' seconds.')
     Y = Y.reshape( arr.shape[0], arr.shape[1], len( colors )-1 )
     return Y
 
@@ -388,13 +383,12 @@ def run_one( imgpath, orderpath, colorpath, outprefix, weightspath = None, save_
     arr_backup=arr.copy()
     arr = arr/255.0
     order=loadtxt(orderpath).astype(uint8)
-    print order
+    print(order)
     colors = asfarray(json.load(open(colorpath))['vs'])
     colors_backup=colors.copy()
-    print colors
+    print(colors)
     colors=colors[order,:]/255.0
-    print colors*255.0
-    
+    print(colors*255.0)
     assert solve_smaller_factor is None or int( solve_smaller_factor ) == solve_smaller_factor
     
     if save_every is None:
@@ -408,9 +402,8 @@ def run_one( imgpath, orderpath, colorpath, outprefix, weightspath = None, save_
     
     kSaveEverySeconds = save_every
 
-    print "Will Save temporary results every "+str(kSaveEverySeconds)+" seconds!"
-    print """If you do not want to save temporary results, you can increase value to look like "--save-every 10000" in command line"""
-
+    print("Will Save temporary results every "+str(kSaveEverySeconds)+" seconds!")
+    print("""If you do not want to save temporary results, you can increase value to look like "--save-every 10000" in command line""")
     ## [ number of iterations, time of last save, arr.shape ]
     last_save = [ None, None, None ]
     def reset_saver( arr_shape ):
@@ -424,7 +417,7 @@ def run_one( imgpath, orderpath, colorpath, outprefix, weightspath = None, save_
         now = time.clock()
         ## Save every 10 seconds!
         if now - last_save[1] > kSaveEverySeconds:
-            print 'Iteration', last_save[0]
+            print('Iteration', last_save[0])
             save_results( xk, colors, arr_shape, outprefix )
             ## Get the time again instead of using 'now', because that doesn't take into
             ## account the time to actually save the images, which is a lot for large images.
@@ -487,7 +480,7 @@ def run_one( imgpath, orderpath, colorpath, outprefix, weightspath = None, save_
             small_Y1 = optimize_smaller( solve_smaller_factor, small_arr, small_Y0, small_img_spatial_static_target )
             
             ## solve on the downsampled problem
-            print '==> Optimizing on a smaller image:', small_arr.shape, 'instead of', large_arr.shape
+            print('==> Optimizing on a smaller image:', small_arr.shape, 'instead of', large_arr.shape)
             reset_saver( small_arr.shape )
             small_Y = optimize( small_arr, colors, small_Y1, weights, img_spatial_static_target = small_img_spatial_static_target, saver = saver )
             
@@ -517,12 +510,10 @@ def run_one( imgpath, orderpath, colorpath, outprefix, weightspath = None, save_
     img_diff=composite_img-arr_backup
     RMSE=sqrt(square(img_diff).sum()/(composite_img.shape[0]*composite_img.shape[1]))
     
-    print 'img_shape is: ', img_diff.shape
-    print 'max diff: ', sqrt(square(img_diff).sum(axis=2)).max()
-    print 'median diff', median(sqrt(square(img_diff).sum(axis=2)))
-    print 'RMSE: ', RMSE
-
-
+    print('img_shape is: ', img_diff.shape)
+    print('max diff: ', sqrt(square(img_diff).sum(axis=2)).max())
+    print('median diff', median(sqrt(square(img_diff).sum(axis=2))))
+    print('RMSE: ', RMSE)
     ##### save alphas as barycentric coordinates
     alphas=1. - Y.reshape((arr.shape[0]*arr.shape[1], -1 ))
     extend_alphas=ones((alphas.shape[0],alphas.shape[1]+1))
@@ -541,19 +532,15 @@ def run_one( imgpath, orderpath, colorpath, outprefix, weightspath = None, save_
 
     # test_weights_diff1=origin_order_barycentric_weights-barycentric_weights
     # test_weights_diff2=barycentric_weights-barycentric_weights
-    # print len(test_weights_diff1[test_weights_diff1==0])
-    # print len(test_weights_diff2[test_weights_diff2==0])
-
-
+    # print(len(test_weights_diff1[test_weights_diff1==0]))
+    # print(len(test_weights_diff2[test_weights_diff2==0]))
     ####assert
     temp=sum(origin_order_barycentric_weights.reshape((origin_order_barycentric_weights.shape[0],origin_order_barycentric_weights.shape[1],1))*colors_backup, axis=1)
     diff=temp-arr_backup.reshape((-1,3))
     # assert(abs(diff).max()<0.5)
-    print abs(diff).max()
-    print diff.shape[0]
-    print sqrt(square(diff).sum()/diff.shape[0])
-
-
+    print(abs(diff).max())
+    print(diff.shape[0])
+    print(sqrt(square(diff).sum()/diff.shape[0]))
     origin_order_barycentric_weights=origin_order_barycentric_weights.reshape((arr.shape[0],arr.shape[1],-1))
 
 
@@ -616,9 +603,9 @@ def save_results( Y, colors, img_shape, outprefix ):
 if __name__ == '__main__':
     
     def usage():
-        print >> sys.stderr, "Usage:", sys.argv[0], "path/to/image path/to/layer_color_order path/to/layer_color_list.js path/to/output [--weights /path/to/weights.js] [--save-every save_every_N_seconds N] [--solve-smaller-factor F] [--too-small T]"
-        print >> sys.stderr, "NOTE: The 0-th element of layer_color_list is the background color."
-        print >> sys.stderr, 'NOTE: Files will be saved to "path/to/output-reconstructed.png" and "path/to/output-layer01.png"'
+        print(>> sys.stderr, "Usage:", sys.argv[0], "path/to/image path/to/layer_color_order path/to/layer_color_list.js path/to/output [--weights /path/to/weights.js] [--save-every save_every_N_seconds N] [--solve-smaller-factor F] [--too-small T]")
+        print(>> sys.stderr, "NOTE: The 0-th element of layer_color_list is the background color.")
+        print(>> sys.stderr, 'NOTE: Files will be saved to "path/to/output-reconstructed.png" and "path/to/output-layer01.png"')
         sys.exit(-1)
     
     args = list( sys.argv[1:] )
@@ -673,5 +660,4 @@ if __name__ == '__main__':
     start=time.clock()
     run_one( current_folder+image_path, current_folder+OrderPath, current_folder+"Tan2016_PD_results/"+color_path, output_prefix, weightspath = current_folder+weightspath, save_every = save_every, solve_smaller_factor = solve_smaller_factor, too_small = too_small )
     end=time.clock()
-    print 'time: ', end-start
-
+    print('time: ', end-start)

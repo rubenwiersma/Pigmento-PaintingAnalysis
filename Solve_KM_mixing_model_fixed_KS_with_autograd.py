@@ -17,7 +17,7 @@ if use_autograd==True:
     import autograd.numpy as np
     from autograd import elementwise_grad, jacobian
     def jit(f):
-        # print "###"
+        # print("###")
         return f
 else:
     from numpy import *
@@ -50,11 +50,11 @@ def cross_bilateral(Weights_map, img, w, sigma_d, sigma_r):
     shape=Weights_map.shape
     new_Weights_map = np.zeros(shape)
     count=0
-    for i in xrange(shape[0]):
-        for j in xrange(shape[1]):
+    for i in range(shape[0]):
+        for j in range(shape[1]):
 
             # if count%200000==0:
-            #     print count
+            #     print(count)
             # count+=1
 
             # Extract local region.
@@ -112,9 +112,8 @@ def objective_func_vector_fixed_KS(x0, arr, H, Smooth_Matrix, W_w=2.0, W_sparse=
     R_rgb=Gamma_trans_img(R_rgb.clip(0,1)) ##clip and gamma correction
     
     # if R_rgb.shape[0] != arr.shape[0]*arr.shape[1]:
-    #     print R_rgb.shape
-    #     print arr.shape
-
+    #     print(R_rgb.shape)
+    #     print(arr.shape)
     obj=R_rgb.reshape(-1)-arr.reshape(-1)
   
 
@@ -140,8 +139,7 @@ def objective_func_vector_fixed_KS(x0, arr, H, Smooth_Matrix, W_w=2.0, W_sparse=
 
 
 
-    # print np.square(obj).sum()
-
+    # print(np.square(obj).sum())
     return obj
 
 
@@ -304,7 +302,7 @@ def gradient_objective_func_fixed_Weights(x0, arr, W, W_sm_K, W_sm_S, W_sm_KS):
 
 
 def optimize(arr, x0, H, Smooth_Matrix, saver=None, W_w=2.0, W_sparse=0.1, W_spatial=0.0, method='L-BFGS-B', W_neighbors=0.0, neighbors=None):
-    # print type(x0)
+    # print(type(x0))
     arr_shape=arr.shape
     N=arr_shape[0]*arr_shape[1]
     M=len(x0)/N
@@ -314,18 +312,16 @@ def optimize(arr, x0, H, Smooth_Matrix, saver=None, W_w=2.0, W_sparse=0.1, W_spa
     #### bounds0 are for least_squares function parameters.
     bounds0=(lb, ub)
     bounds3=[]
-    for i in xrange(len(x0)):
+    for i in range(len(x0)):
         bounds3.append((lb,ub))
     
-    # print x0.max()
-    # print x0.min()
+    # print(x0.max())
+    # print(x0.min())
     # x0[x0<1e-15]=2e-15
     # x0[x0>=1.0]=1.0-1e-15
 
-    # print x0.max()
-    # print x0.min()
-
-
+    # print(x0.max())
+    # print(x0.min())
     start_time=time.clock()
     if method=='trf':
         if use_autograd==False:
@@ -337,11 +333,11 @@ def optimize(arr, x0, H, Smooth_Matrix, saver=None, W_w=2.0, W_sparse=0.1, W_spa
         if use_autograd==False:
             res=sopt.minimize(objective_func_fixed_KS, x0, args=(arr, H, Smooth_Matrix, W_w, W_sparse, W_spatial, W_neighbors, neighbors), bounds=bounds3, method=method, callback=saver)
         else:
-            # print 'this'
+            # print('this')
             res=sopt.minimize(objective_func_fixed_KS, x0, args=(arr, H, Smooth_Matrix, W_w, W_sparse, W_spatial, W_neighbors, neighbors), bounds=bounds3, method=method, jac=gradient_objective_func_fixed_KS, callback=saver,options={'gtol':1e-4, 'ftol': 1e-4})
 
     end_time=time.clock()
-    # print 'Optimize variables of size ', x0.shape, ' took ', (end_time-start_time), ' seconds.'
+    # print('Optimize variables of size ', x0.shape, ' took ', (end_time-start_time), ' seconds.')
     x=res["x"]
 
 
@@ -370,7 +366,7 @@ def optimize_fixed_Weights(x0, arr, W, W_sm_K, W_sm_S, W_sm_KS, method='L-BFGS-B
     bounds0=(eps, np.inf)
 
     bounds3=[]
-    for i in xrange(len(x0)):
+    for i in range(len(x0)):
         bounds3.append((eps,None))
 
 
@@ -389,8 +385,7 @@ def optimize_fixed_Weights(x0, arr, W, W_sm_K, W_sm_S, W_sm_KS, method='L-BFGS-B
     end_time=time.clock()
 
     x=res["x"]
-    print res["message"]
-
+    print(res["message"])
     return x
 
 
@@ -406,9 +401,8 @@ def save_results(x0, arr, H, output_prefix):
     Weights=x0.reshape((N,M))
     K0=H[:,:L]
     S0=H[:,L:]
-    print Weights.sum(axis=1).min()
-    print Weights.sum(axis=1).max()
-
+    print(Weights.sum(axis=1).min())
+    print(Weights.sum(axis=1).max())
     ### reconstruction of input
     R_vector=KM_mixing_multiplepigments(K0, S0, Weights, r=1.0, h=1.0)
     ### from R spectrum x wavelength spectrums to linear rgb colors 
@@ -419,8 +413,7 @@ def save_results(x0, arr, H, output_prefix):
     R_rgb=np.dot(xyztorgb,R_xyz.transpose()).transpose() ###linear rgb value, shape is N*3
     R_rgb=Gamma_trans_img(R_rgb.clip(0,1)) ##clip and gamma correction
     
-    print 'RGB RMSE: ', np.sqrt(np.square(255*(arr.reshape((-1,3))-R_rgb)).sum()/N)
-    
+    print('RGB RMSE: ', np.sqrt(np.square(255*(arr.reshape((-1,3))-R_rgb)).sum()/N))
     filename=output_prefix+"-fixed_KS-reconstructed.png"
     plt.imsave(filename,(R_rgb.reshape(original_shape)*255.0).clip(0,255).round().astype(np.uint8))
     np.savetxt(output_prefix+"-mixing_weights.txt", Weights)
@@ -434,16 +427,16 @@ def save_results(x0, arr, H, output_prefix):
     ### compute sparsity
     sparsity_thres_array=np.array([0.000001, 0.00001, 0.0001,0.001,0.01,0.1])
     Weights_sparsity_list=np.ones(len(sparsity_thres_array))
-    for thres_ind in xrange(len(sparsity_thres_array)):
+    for thres_ind in range(len(sparsity_thres_array)):
         Weights_sparsity_list[thres_ind]=len(Weights[Weights<=sparsity_thres_array[thres_ind]])*1.0/(N*M)
     
-    print "Weights_sparsity_list: ", Weights_sparsity_list
+    print("Weights_sparsity_list: ", Weights_sparsity_list)
     np.savetxt(output_prefix+"-mixing_weights-Sparsity.txt", Weights_sparsity_list)
 
 
 
     # normalized_Weights=Weights/Weights.sum(axis=1).reshape((-1,1))
-    # for i in xrange(M):
+    # for i in range(M):
     #     #### save normalized_weights_map for each pigment.
     #     normalized_weights_map_name=output_prefix+"-normalized_mixing_weights_map-%02d.png" % i
     #     normalized_Weights_map=normalized_Weights[:,i].reshape(img_size).copy()
@@ -460,7 +453,7 @@ def save_results(x0, arr, H, output_prefix):
 
 
 
-    for i in xrange(M):
+    for i in range(M):
         #### save weights_map for each pigment.
         weights_map_name=output_prefix+"-mixing_weights_map-%02d.png" % i
         Weights_map=Weights[:,i].reshape(img_size).copy()
@@ -509,9 +502,8 @@ def save_results_2(x0, arr_shape, H, output_prefix):
     Weights=x0.reshape((N,M))
     K0=H[:,:L]
     S0=H[:,L:]
-    print Weights.sum(axis=1).min()
-    print Weights.sum(axis=1).max()
-
+    print(Weights.sum(axis=1).min())
+    print(Weights.sum(axis=1).max())
     ### reconstruction of input
     R_vector=KM_mixing_multiplepigments(K0, S0, Weights, r=1.0, h=1.0)
     ### from R spectrum x wavelength spectrums to linear rgb colors 
@@ -522,8 +514,7 @@ def save_results_2(x0, arr_shape, H, output_prefix):
     R_rgb=np.dot(xyztorgb,R_xyz.transpose()).transpose() ###linear rgb value, shape is N*3
     R_rgb=Gamma_trans_img(R_rgb.clip(0,1)) ##clip and gamma correction
     
-    # print 'RGB RMSE: ', np.sqrt(np.square(255*(arr.reshape((-1,3))-R_rgb)).sum()/N)
-    
+    # print('RGB RMSE: ', np.sqrt(np.square(255*(arr.reshape((-1,3))-R_rgb)).sum()/N))
     filename=output_prefix+"-fixed_KS-reconstructed.png"
     plt.imsave(filename,(R_rgb.reshape(original_shape)*255.0).clip(0,255).round().astype(np.uint8))
     # np.savetxt(output_prefix+"-mixing_weights.txt", Weights)
@@ -532,16 +523,16 @@ def save_results_2(x0, arr_shape, H, output_prefix):
     ## compute sparsity
     # sparsity_thres_array=np.array([0.000001, 0.00001, 0.0001,0.001,0.01,0.1])
     # Weights_sparsity_list=np.ones(len(sparsity_thres_array))
-    # for thres_ind in xrange(len(sparsity_thres_array)):
+    # for thres_ind in range(len(sparsity_thres_array)):
     #     Weights_sparsity_list[thres_ind]=len(Weights[Weights<=sparsity_thres_array[thres_ind]])*1.0/(N*M)
     
-    # print "Weights_sparsity_list: ", Weights_sparsity_list
+    # print("Weights_sparsity_list: ", Weights_sparsity_list)
     # np.savetxt(output_prefix+"-mixing_weights-Sparsity.txt", Weights_sparsity_list)
 
 
 
     # normalized_Weights=Weights/Weights.sum(axis=1).reshape((-1,1))
-    # for i in xrange(M):
+    # for i in range(M):
     #     #### save normalized_weights_map for each pigment.
     #     normalized_weights_map_name=output_prefix+"-normalized_mixing_weights_map-%02d.png" % i
     #     normalized_Weights_map=normalized_Weights[:,i].reshape(img_size).copy()
@@ -556,7 +547,7 @@ def save_results_2(x0, arr_shape, H, output_prefix):
     # cv2.imwrite(output_prefix+"-mixing_weights_sum_map-min-"+str(W_min)+"-max-"+str(W_max)+".png", (Weights_sum_map*255.0).round().astype(np.uint8))
         
 
-    for i in xrange(M):
+    for i in range(M):
         #### save weights_map for each pigment.
         weights_map_name=output_prefix+"-mixing_weights_map-%02d.png" % i
         Weights_map=Weights[:,i].reshape(img_size).copy()
@@ -589,7 +580,7 @@ def save_pigments(x_H, M, output_dir):
     C=3 ## channel number
     w=h=50
     pigments=np.ones((w,h*M,C))
-    for i in xrange(M):
+    for i in range(M):
         pigments[:,i*h:i*h+h]=R_rgb[i]
     plt.imsave(output_dir+"-primary_pigments_color.png", (pigments*255.0).round().astype(np.uint8))
 
@@ -601,7 +592,7 @@ def save_pigments(x_H, M, output_dir):
 
 
     xaxis=np.arange(L)
-    for i in xrange(M):
+    for i in range(M):
         fig=plt.figure()
         plt.plot(xaxis, K0[i], 'b-')
         fig.savefig(output_dir+"-primary_pigments_K_curve-"+str(i)+".png")
@@ -627,11 +618,10 @@ def Unique_colors_pixel_mapping(img_data): ### shape is row*col*channel
     rows=new_data.shape[0]
     columns=new_data.shape[1]
     dims=new_data.shape[2]
-    # print new_data.shape
+    # print(new_data.shape)
     new_data=new_data.reshape((-1,3))
-    # print new_data.dtype
-    # print new_data.shape
-
+    # print(new_data.dtype)
+    # print(new_data.shape)
     ### colors2count dict and colors2xy dict
     # colors2count ={}
     colors2xy ={}
@@ -643,12 +633,12 @@ def Unique_colors_pixel_mapping(img_data): ### shape is row*col*channel
         # colors2count[tuple(element)]=0
         colors2xy.setdefault(tuple(element),[])
         
-    for index in xrange(len(new_data)):
+    for index in range(len(new_data)):
         element=new_data[index]
         # colors2count[tuple(element)]+=1
         colors2xy[tuple(element)].append(index)
 
-    # print len(unique_new_data)
+    # print(len(unique_new_data))
     return colors2xy
 
 
@@ -705,29 +695,26 @@ if __name__=="__main__":
     KS_file_name=sys.argv[2]
     Weights_file_name=sys.argv[3]
     output_prefix=sys.argv[4]
-    W_w=np.float(sys.argv[5])
-    W_sparse=np.float(sys.argv[6])
-    solve_choice=np.int(sys.argv[7])
-    W_spatial=np.float(sys.argv[8])
-    print 'W_spatial',W_spatial
-
+    W_w=np.float64(sys.argv[5])
+    W_sparse=np.float64(sys.argv[6])
+    solve_choice=np.int32(sys.argv[7])
+    W_spatial=np.float64(sys.argv[8])
+    print('W_spatial',W_spatial)
     global save_for_application_path_prefix
     save_for_application_path_prefix="./Application_Files/"
 
 
     W_neighbors=0.0
     if solve_choice==3 or solve_choice==6 : #### solve per pixel with neighborhood info constraints
-        W_neighbors=np.float(sys.argv[9])
+        W_neighbors=np.float64(sys.argv[9])
 
-    print 'W_neighbors',W_neighbors
-    
-
+    print('W_neighbors',W_neighbors)
     START=time.time()
     img=np.asarray(Image.open(img_file).convert('RGB'))
 
     arr=img.copy()/255.0
     H=np.loadtxt(KS_file_name)
-    print H.shape
+    print(H.shape)
     eps=1e-15
 
     # ##### is it OK? for real KS value, all are non-zero? 
@@ -750,14 +737,14 @@ if __name__=="__main__":
         prior_mixing_weights=None
 
     elif Weights_file_name=="primary_pigments_mixing_weights.txt":
-        print Weights_file_name
+        print(Weights_file_name)
         prior_mixing_weights=np.loadtxt(Weights_file_name)
-        print prior_mixing_weights.shape
+        print(prior_mixing_weights.shape)
         W=np.random.random_sample((arr.shape[0]*arr.shape[1],H.shape[0]))
         W=W/W.sum(axis=1).reshape((-1,1))
     else:
         extention=os.path.splitext(Weights_file_name)[1]
-        print extention
+        print(extention)
         if extention==".js":
             with open(Weights_file_name) as data_file:    
                 W_js = json.load(data_file)
@@ -766,10 +753,8 @@ if __name__=="__main__":
             W=np.loadtxt(Weights_file_name)
             W=W.reshape((arr.shape[0],arr.shape[1],M))
         
-        print W.shape
-        
-
-        # for i in xrange(W.shape[-1]):
+        print(W.shape)
+        # for i in range(W.shape[-1]):
         #     weights_map_name=output_prefix+"-initial-weights_map-%02d.png" % i
         #     Weights_map=W[:,:,i]
         #     cv2.imwrite(weights_map_name, (Weights_map*255.0).clip(0,255).round().astype(np.uint8))
@@ -782,7 +767,7 @@ if __name__=="__main__":
 
 
         initial_error= objective_func_vector_fixed_KS(W.reshape(-1), arr, H, None, W_w=0.0, W_sparse=0.0,W_spatial=0.0,W_neighbors=0.0, neighbors=None)
-        print 'initial_error: ', np.sqrt(np.square(initial_error*255.0).sum()/N)
+        print('initial_error: ', np.sqrt(np.square(initial_error*255.0).sum()/N))
         initial_recover=initial_error.reshape((-1,3))+arr.reshape((-1,3))
         plt.imsave(output_prefix+"-initial_recover.png",(initial_recover.reshape(original_shape)*255.0).clip(0,255).round().astype(np.uint8))
         prior_mixing_weights=None
@@ -806,7 +791,7 @@ if __name__=="__main__":
         now = time.clock()
         ## Save every 10 seconds!
         if now - last_save[1] > kSaveEverySeconds:
-            print 'Iteration', last_save[0]
+            print('Iteration', last_save[0])
             save_results_2(xk, arr_shape, H, output_prefix)
             ## Get the time again instead of using 'now', because that doesn't take into
             ## account the time to actually save the images, which is a lot for large images.
@@ -840,8 +825,7 @@ if __name__=="__main__":
         
 
         ## solve on the downsampled problem
-        print '==> Optimizing on a smaller image:', small_arr.shape, 'instead of', large_arr.shape
-        
+        print('==> Optimizing on a smaller image:', small_arr.shape, 'instead of', large_arr.shape)
         arr_shape=(small_arr.shape[0],small_arr.shape[1])
 
         
@@ -857,18 +841,14 @@ if __name__=="__main__":
             Smooth_Matrix=Blf
 
         else:
-            print "Error! No such choice!"
-
-
-
+            print("Error! No such choice!")
         time1=time.time()
-        print "compute smooth matrix time: ", time1-time0
-
+        print("compute smooth matrix time: ", time1-time0)
         reset_saver(small_arr.shape)
         small_Y = optimize(small_arr, small_Y1, H, Smooth_Matrix, saver=saver, W_w=W_w, W_sparse=W_sparse, W_spatial=W_spatial, method='L-BFGS-B')
         saver(small_Y.reshape(-1))
         time2=time.time()
-        print 'this level use time: ', time2-time1
+        print('this level use time: ', time2-time1)
         # save_layers(small_Y.reshape(-1), small_arr, H, output_prefix+"-recursivelevel-"+str(level))
 
         level+=1
@@ -887,11 +867,6 @@ if __name__=="__main__":
         return large_Y1.ravel(), level
 
 
-
-
-    from joblib import Parallel, delayed
-    import multiprocessing
-
     kDisableParallel = False
     if kDisableParallel:
         def Parallel( iter, n_jobs = None ):
@@ -901,7 +876,7 @@ if __name__=="__main__":
     
     def per_pixel_solve(i, pixel, z0,initial, H, method='trf'):
         if i%10000==0:
-            print "pixel: ", i
+            print("pixel: ", i)
         pixel=pixel.reshape((1,1,-1))
         y0=initial.copy()
         y0/=y0.sum()
@@ -910,11 +885,11 @@ if __name__=="__main__":
    
     
     def per_patch_solve(arr,col_step, ind, x1, x0, H, p_size, offset, Lap, method='L-BFGS-B'):
-        # print method
+        # print(method)
         i=ind/col_step
         j=ind%col_step
         if ind%100==0:
-            print ind
+            print(ind)
         patch = np.array(arr[offset+p_size*i:offset+p_size*(i+1), offset+p_size*j:offset+p_size*(j+1), :])
         y0 = x0[offset+p_size*i:offset+p_size*(i+1), offset+p_size*j:offset+p_size*(j+1), :].flatten()
         y0 = optimize(patch, y0, H, Lap, saver=None, W_w=W_w, W_sparse=W_sparse,W_spatial=W_spatial, method=method)
@@ -924,7 +899,7 @@ if __name__=="__main__":
         # Y_sum_max=Y_sum.max()
         # Y_sum_min=Y_sum.min()
         # if (abs(Y_sum_max-1.0)>=0.2).any() or (abs(Y_sum_min-1.0)>=0.2).any():
-        #     print ind,"abnormal"
+        #     print(ind,"abnormal")
         #     y0 = np.random.random_sample((p_size,p_size,M))
         #     y0 = y0/y0.sum(axis=2).reshape((p_size,p_size,1))
         #     y0 = y0.flatten()
@@ -963,7 +938,7 @@ if __name__=="__main__":
             diff=np.square(diff).sum(axis=2) ### shape is (N1,N)
             min_indices=np.argmin(diff,axis=1)#### shape is (N1,)
             
-            for i in xrange(N1):
+            for i in range(N1):
                 Final_weights[i]=prior_mixing_weights[min_indices[i]]
 
    
@@ -993,8 +968,7 @@ if __name__=="__main__":
     #     ## get an improved Y by recursively shrinking
     #     small_Y1,offset,level = optimize_smaller_parallel_per_patch(small_arr, H, p_size, offset, Lap, level)
     #     ## solve on the downsampled problem
-    #     print '==> Optimizing on a smaller image:', small_arr.shape, 'instead of', large_arr.shape
-
+    #     print('==> Optimizing on a smaller image:', small_arr.shape, 'instead of', large_arr.shape)
     #     if level%2==0:
     #         offset=0
     #         row_step=small_arr.shape[0]/p_size #### here is naive situation: the original image can be divided by p_size. Need modify this to robustly fit for other examples. 
@@ -1005,14 +979,12 @@ if __name__=="__main__":
     #         col_step=small_arr.shape[1]/p_size-1
        
 
-    #     print small_arr.shape
-    #     print 'level ', level
-    #     print 'p_size ', p_size
-    #     print 'offset ', offset
-    #     print row_step, col_step
-    #     print method
-
-
+    #     print(small_arr.shape)
+    #     print('level ', level)
+    #     print('p_size ', p_size)
+    #     print('offset ', offset)
+    #     print(row_step, col_step)
+    #     print(method)
     #     small_Y1=small_Y1.reshape((small_arr.shape[0],small_arr.shape[1],M))
 
 
@@ -1025,7 +997,7 @@ if __name__=="__main__":
     #     small_Y = np.memmap('results',shape=(small_arr.shape[0],small_arr.shape[1],M), mode='w+', dtype=np.float64)
     #     small_Y[:,:,:] = small_Y1[:,:,:]
     #     num_cores = multiprocessing.cpu_count()
-    #     Parallel(n_jobs=num_cores)(delayed(per_patch_solve)(small_arr, col_step, i, small_Y, small_Y1, H, p_size,offset,Lap, method=method) for i in xrange(row_step*col_step))
+    #     Parallel(n_jobs=num_cores)(delayed(per_patch_solve)(small_arr, col_step, i, small_Y, small_Y1, H, p_size,offset,Lap, method=method) for i in range(row_step*col_step))
 
 
     #     # ##### per pixel solve
@@ -1033,7 +1005,7 @@ if __name__=="__main__":
     #     # R=small_arr.reshape((-1,3))
     #     # small_Y = np.memmap('results_choice0',shape=(small_Y1.shape[0],M), mode='w+', dtype=np.float64)
     #     # num_cores = multiprocessing.cpu_count()
-    #     # Parallel(n_jobs=num_cores)(delayed(per_pixel_solve)(i, R[i],small_Y,small_Y1[i], H) for i in xrange(small_Y.shape[0]))
+    #     # Parallel(n_jobs=num_cores)(delayed(per_pixel_solve)(i, R[i],small_Y,small_Y1[i], H) for i in range(small_Y.shape[0]))
 
 
 
@@ -1071,9 +1043,8 @@ if __name__=="__main__":
     #     col_ind=i%cols
 
     #     if i%10000==0:
-    #         print "pixel: ", i
-    #         print time.time()
-   
+    #         print("pixel: ", i)
+    #         print(time.time())
     #     y = optimize(pixel, y0, H, None, saver=None, W_w=W_w, W_sparse=W_sparse, W_spatial=0.0, method=method, W_neighbors=W_neighbors, neighbors=neighbors)
     #     x1[row_ind,col_ind,:]=y
    
@@ -1087,9 +1058,8 @@ if __name__=="__main__":
         pixel=arr[row_ind,col_ind].reshape((1,1,3)).copy()
 
         if i%10000==0:
-            print "pixel: ", i
-            # print time.time()
-
+            print("pixel: ", i)
+            # print(time.time())
         imin=max(np.array([row_ind-half_win,0]))   ###### if from autograd.numpy import *, then use default python min(a,b) will cause error.
         imax=min(np.array([row_ind+half_win+1,rows]))
         jmin=max(np.array([col_ind-half_win,0]))
@@ -1123,7 +1093,7 @@ if __name__=="__main__":
             # num_cores = multiprocessing.cpu_count()
             # row_step=large_arr.shape[0]/p_size #### here is naive situation: the original image can be divided by p_size. Need modify this to robustly fit for other examples. 
             # col_step=large_arr.shape[1]/p_size
-            # Parallel(n_jobs=num_cores)(delayed(per_patch_solve)(large_arr, col_step, i, large_Y, large_Y1, H, p_size ,0, Lap, method='L-BFGS-B') for i in xrange(row_step*col_step))
+            # Parallel(n_jobs=num_cores)(delayed(per_patch_solve)(large_arr, col_step, i, large_Y, large_Y1, H, p_size ,0, Lap, method='L-BFGS-B') for i in range(row_step*col_step))
         
 
             return large_Y,level
@@ -1135,9 +1105,7 @@ if __name__=="__main__":
         ## get an improved Y by recursively shrinking
         small_Y1,level = optimize_smaller(small_arr, H, p_size, Lap, level)
         ## solve on the downsampled problem
-        print '==> Optimizing on a smaller image:', small_arr.shape, 'instead of', large_arr.shape
-       
-        
+        print('==> Optimizing on a smaller image:', small_arr.shape, 'instead of', large_arr.shape)
         if level%2==0:
             offset=0
             row_step=small_arr.shape[0]/p_size #### here is naive situation: the original image can be divided by p_size. Need modify this to robustly fit for other examples. 
@@ -1148,11 +1116,9 @@ if __name__=="__main__":
             col_step=small_arr.shape[1]/p_size-1
        
 
-        print small_arr.shape
-        print 'level ', level
-        print 'p_size ', p_size
-
-
+        print(small_arr.shape)
+        print('level ', level)
+        print('p_size ', p_size)
         small_Y1=small_Y1.reshape((small_arr.shape[0],small_arr.shape[1],M))
 
 
@@ -1169,21 +1135,18 @@ if __name__=="__main__":
         LOOP=row_step*col_step
 
         #### parallel verion
-        num_cores = multiprocessing.cpu_count()
 
-
-        Parallel(n_jobs=num_cores)(delayed(per_patch_solve)(small_arr, col_step, i, small_Y, small_Y1, H, p_size,offset,Lap, method='L-BFGS-B') for i in xrange(LOOP))
+        # Parallel(n_jobs=num_cores)(delayed(per_patch_solve)(small_arr, col_step, i, small_Y, small_Y1, H, p_size,offset,Lap, method='L-BFGS-B') for i in range(LOOP))
         
         # #### for loop version.
         # # LOOP=1
-        # for i in xrange(LOOP):
+        # for i in range(LOOP):
         #     per_patch_solve(small_arr, col_step, i, small_Y, small_Y1, H, p_size, offset, Lap, method='L-BFGS-B')
 
 
         end_t=time.time()
 
-        print "current level time: ", end_t-start_t
-
+        print("current level time: ", end_t-start_t)
         # save_results(small_Y.reshape(-1), small_arr, H, output_prefix+"-p_size-"+str(p_size)+"-recursivelevel-"+str(level))
         
         level+=1
@@ -1204,16 +1167,12 @@ if __name__=="__main__":
 
     if solve_choice==0: #### downsampled to smallest one to solve and recursively upsample to original size.
                         #### if do not consider spatial info, this choice is not useful. 
-        print 'choice: ', solve_choice
-        
+        print('choice: ', solve_choice)
         smooth_choice=sys.argv[10]
         recursive_choice=sys.argv[11]
 
-        print 'smooth_choice: ',smooth_choice
-        print 'recursive_choice: ',recursive_choice
-
-
-
+        print('smooth_choice: ',smooth_choice)
+        print('recursive_choice: ',recursive_choice)
         if recursive_choice=='Yes':
             level=0
             x0, level=optimize_smaller_whole(arr, x0.reshape(-1), level, smooth_choice)
@@ -1237,21 +1196,13 @@ if __name__=="__main__":
             Blf=create_cross_bilateral(arr*255.0, M)
             Smooth_Matrix=Blf
         else:
-            print "Error! No such choice combination!"
-
-
+            print("Error! No such choice combination!")
         time1=time.time()
-        print "compute smooth matrix time: ", time1-time0
-
+        print("compute smooth matrix time: ", time1-time0)
         x0 = optimize( arr, x0.reshape(-1), H, Smooth_Matrix, saver=saver, W_w=W_w, W_sparse=W_sparse, W_spatial=W_spatial, method='L-BFGS-B')
         save_results(x0, arr, H, output_prefix+"-final_recursivelevel-")
         time2=time.time()
-        print "final level use time: ", time2-time1
-        
-
-
-
-
+        print("final level use time: ", time2-time1)
     elif solve_choice==1: 
     #### per pixel solve (still slow for large size image, weights map is not smooth)
         
@@ -1265,7 +1216,7 @@ if __name__=="__main__":
 
         x1 = np.memmap('results_choice2',shape=(N,M), mode='w+', dtype=np.float64)
         num_cores = multiprocessing.cpu_count()
-        Parallel(n_jobs=num_cores)(delayed(per_pixel_solve)(i, R[i],x1,Initial[i], H) for i in xrange(N))
+        Parallel(n_jobs=num_cores)(delayed(per_pixel_solve)(i, R[i],x1,Initial[i], H) for i in range(N))
         
         x0=x1.copy()
         x0=x0.reshape(-1)
@@ -1277,7 +1228,7 @@ if __name__=="__main__":
         method='trf'
         UNIQ_map=Unique_colors_pixel_mapping(img) ### data type is uint8, (0,255)
         UNIQ=np.array(UNIQ_map.keys()) #### should be N1*3
-        print "unique colors: ", UNIQ.shape
+        print("unique colors: ", UNIQ.shape)
         N1=len(UNIQ)
         plt.imsave(output_prefix+"-unique_colors.png", UNIQ.reshape((N1,1,3)))
         UNIQ_foat=UNIQ/255.0 ### do not foget        
@@ -1287,7 +1238,7 @@ if __name__=="__main__":
         if prior_mixing_weights!=None:
             Initial_x0=np.ones((N,M))
             ### map unique color pixel's weights back to orignal pixel postion.
-            for i in xrange(N1):
+            for i in range(N1):
                 index_list=UNIQ_map[tuple(UNIQ[i])]
                 Initial_x0[index_list,:]=Initial[i:i+1,:]
 
@@ -1298,17 +1249,14 @@ if __name__=="__main__":
 
         z0 = np.memmap('results_choice2',shape=(N1,M), mode='w+', dtype=np.float64)
         num_cores = multiprocessing.cpu_count()
-        Parallel(n_jobs=num_cores)(delayed(per_pixel_solve)(i, UNIQ_foat[i],z0,Initial[i], H) for i in xrange(N1))
+        Parallel(n_jobs=num_cores)(delayed(per_pixel_solve)(i, UNIQ_foat[i],z0,Initial[i], H) for i in range(N1))
 
 
-        print z0.sum(axis=1).max()
-        print z0.sum(axis=1).min()
-
-
-
+        print(z0.sum(axis=1).max())
+        print(z0.sum(axis=1).min())
         x0=np.ones((N,M))
         ### map unique color pixel's weights back to orignal pixel postion.
-        for i in xrange(N1):
+        for i in range(N1):
             index_list=UNIQ_map[tuple(UNIQ[i])]
             x0[index_list,:]=z0[i:i+1,:]
 
@@ -1319,7 +1267,7 @@ if __name__=="__main__":
 
     elif solve_choice==3:   
 
-        print 'choice: ', solve_choice
+        print('choice: ', solve_choice)
         p_size=10
         patch_shape=(p_size,p_size)
         Lap=create_laplacian(patch_shape,M)
@@ -1354,33 +1302,33 @@ if __name__=="__main__":
 
 
 
-        for loop in xrange(max_loop):
-            print half_win
-            print W_neighbors
+        for loop in range(max_loop):
+            print(half_win)
+            print(W_neighbors)
             # x1=np.random.random_sample((arr.shape[0],arr.shape[1],M))
             x1 = np.memmap('results-perpixel-solve', shape=(rows,cols, M), mode='w+', dtype=np.float64)
             x1[:,:,:]=x0[:,:,:]
 
 
             # ### for loop version
-            # for i in xrange(N): 
+            # for i in range(N): 
             #     row_ind=i/rows
             #     col_ind=i%cols
             #     per_pixel_solve_with_spatial_info(i, arr[row_ind,col_ind,:].reshape((1,1,3)), arr.shape, x1, x0[row_ind,col_ind,:], H, get_neighbors(i,x0,arr.shape), half_win=half_win)
            
 
             # ### old for loop version
-            # for i in xrange(N):
+            # for i in range(N):
             #     per_pixel_solve_with_spatial_info(i, arr, x1, x0, H, half_win=half_win)
 
 
                  
             # ### parallel version
-            # Parallel(n_jobs=num_cores)(delayed(per_pixel_solve_with_spatial_info)(i, arr[i/rows,i%cols,:].reshape((1,1,3)), arr.shape, x1, x0[i/rows,i%cols,:].copy(), H, get_neighbors(i,x0,arr.shape), half_win=half_win) for i in xrange(N))
+            # Parallel(n_jobs=num_cores)(delayed(per_pixel_solve_with_spatial_info)(i, arr[i/rows,i%cols,:].reshape((1,1,3)), arr.shape, x1, x0[i/rows,i%cols,:].copy(), H, get_neighbors(i,x0,arr.shape), half_win=half_win) for i in range(N))
             
 
             ### old parallel version
-            Parallel(n_jobs=num_cores)(delayed(per_pixel_solve_with_spatial_info)(i, arr, x1, x0, H, half_win=half_win, method=method) for i in xrange(N))
+            Parallel(n_jobs=num_cores)(delayed(per_pixel_solve_with_spatial_info)(i, arr, x1, x0, H, half_win=half_win, method=method) for i in range(N))
 
 
             x0=x1.copy()
@@ -1394,9 +1342,7 @@ if __name__=="__main__":
 
 
     elif solve_choice==4:  #### per original patch solve #### can add spatial term to solver. (slower than choice 2 but may get smooth weights map)
-        print "choice: ", solve_choice
-
-
+        print("choice: ", solve_choice)
         offset=0
         p_size=10
         row_step=arr.shape[0]/p_size #### here is naive situation: the original image can be divided by p_size. Need modify this to robustly fit for other examples. 
@@ -1413,7 +1359,7 @@ if __name__=="__main__":
                         
             UNIQ_map=Unique_colors_pixel_mapping(img) ### data type is uint8, (0,255)
             UNIQ=np.array(UNIQ_map.keys()) #### should be N1*3
-            print "unique colors: ", UNIQ.shape
+            print("unique colors: ", UNIQ.shape)
             N1=len(UNIQ)
             plt.imsave(output_prefix+"-unique_colors.png", UNIQ.reshape((N1,1,3)))
             UNIQ_foat=UNIQ/255.0 ### do not foget  
@@ -1421,7 +1367,7 @@ if __name__=="__main__":
             Initial=From_wegihts_for_compositedPigments_to_weights_for_uniqueColors(UNIQ_foat, H, prior_mixing_weights)
             Initial_x0=np.ones((N,M))
             ### map unique color pixel's weights back to orignal pixel postion.
-            for i in xrange(N1):
+            for i in range(N1):
                 index_list=UNIQ_map[tuple(UNIQ[i])]
                 Initial_x0[index_list,:]=Initial[i:i+1,:]
 
@@ -1441,7 +1387,7 @@ if __name__=="__main__":
         ##### parallel version
         x1 = np.memmap('results_choice4',shape=(arr.shape[0],arr.shape[1],M), mode='w+', dtype=np.float64)
         num_cores = multiprocessing.cpu_count()
-        Parallel(n_jobs=num_cores)(delayed(per_patch_solve)(arr,col_step, i, x1, x0, H, p_size,offset,Lap) for i in xrange(row_step*col_step))
+        Parallel(n_jobs=num_cores)(delayed(per_patch_solve)(arr,col_step, i, x1, x0, H, p_size,offset,Lap) for i in range(row_step*col_step))
         
         x0=x1.copy()
         x0=x0.reshape(-1)
@@ -1450,7 +1396,7 @@ if __name__=="__main__":
 
 
     elif solve_choice==5: #### use other choice weights results as input (so sys.argv[3] should not be None, solve whole image directly again. 
-        print "choice: ", solve_choice
+        print("choice: ", solve_choice)
         p_size=10
 
         ##### this is suitable for using choice 4 weights results as input
@@ -1471,7 +1417,7 @@ if __name__=="__main__":
         x1 = np.memmap('results_choice5',shape=(arr.shape[0],arr.shape[1],M), mode='w+', dtype=np.float64)
         x1[:,:,:] = x0[:,:,:]
         num_cores = multiprocessing.cpu_count()
-        Parallel(n_jobs=num_cores)(delayed(per_patch_solve)(arr,col_step, i, x1, x0,H, p_size,offset,Lap) for i in xrange(row_step*col_step))
+        Parallel(n_jobs=num_cores)(delayed(per_patch_solve)(arr,col_step, i, x1, x0,H, p_size,offset,Lap) for i in range(row_step*col_step))
 
         x0=x1.copy()
         x0=x0.reshape(-1)
@@ -1481,16 +1427,15 @@ if __name__=="__main__":
     
     elif solve_choice==6:
 
-        print 'solve_choice', solve_choice
-        W_sm_K=np.float(sys.argv[10])
-        W_sm_S=np.float(sys.argv[11])
-        W_sm_KS=np.float(sys.argv[12])
+        print('solve_choice', solve_choice)
+        W_sm_K=np.float64(sys.argv[10])
+        W_sm_S=np.float64(sys.argv[11])
+        W_sm_KS=np.float64(sys.argv[12])
 
         # W_sm_K, W_sm_S, W_sm_KS=np.array([0.005,0.05,1e-6])
         # # W_sm_K, W_sm_S, W_sm_KS=np.array([100.0,100.0,1.0])
         # # W_sm_K, W_sm_S, W_sm_KS=np.array([0.0,0.0,0.0])
-        print W_sm_K, W_sm_S, W_sm_KS
-
+        print(W_sm_K, W_sm_S, W_sm_KS)
         output_prefix=output_prefix+"-"+str(W_sm_K)+"-"+str(W_sm_S)+"-"+str(W_sm_KS)
         # output_prefix=output_prefix+"-W_sm_K_"+str(W_sm_K)+"-W_sm_S_"+str(W_sm_S)+"-W_sm_KS_"+str(W_sm_KS)
         
@@ -1515,12 +1460,12 @@ if __name__=="__main__":
 
         output_prefix=output_prefix+"-Win_"+str(2*half_win+1)
 
-        for loop in xrange(Max_loop):
+        for loop in range(Max_loop):
 
             #### do per pixel with neighbor info first to get weights
             x1 = np.memmap('results_choice6',shape=(rows,cols, M), mode='w+', dtype=np.float64)
             x1[:,:,:]=x0[:,:,:]
-            Parallel(n_jobs=num_cores)(delayed(per_pixel_solve_with_spatial_info)(i, arr, x1, x0, H, half_win=half_win) for i in xrange(N))
+            Parallel(n_jobs=num_cores)(delayed(per_pixel_solve_with_spatial_info)(i, arr, x1, x0, H, half_win=half_win) for i in range(N))
             x0=x1.copy()
 
             save_results(x0.reshape(-1), arr, H, output_prefix+"-Weights"+"-alternate_loop-"+str(loop))
@@ -1532,16 +1477,9 @@ if __name__=="__main__":
                 start1=time.time()
                 x_H=optimize_fixed_Weights(x_initial, arr, Weights, W_sm_K, W_sm_S, W_sm_KS, method='trf')
                 end1=time.time()
-                print 'fixed weights,solve KS time: ', (end1-start1)
+                print('fixed weights,solve KS time: ', (end1-start1))
                 save_pigments(x_H, M, output_prefix+"-Pigments"+"-alternate_loop-"+str(loop+1))
                 H=x_H.reshape((M,-1))
-                print "pigments KS diff", x_H-x_initial
-
-
-
+                print("pigments KS diff", x_H-x_initial)
     END=time.time()
-    print 'total time: ', (END-START)
-    
-
-    
-    
+    print('total time: ', (END-START))

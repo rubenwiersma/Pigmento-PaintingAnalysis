@@ -22,8 +22,7 @@ class Thickness_Scattering_Weights_modification_app:
         self.mask=controller.mask
 
         if self.mask is None:
-            print "no input mask"
+            print("no input mask")
         else:
-            print self.mask.shape
-
+            print(self.mask.shape)
         self.AllData=controller.AllData

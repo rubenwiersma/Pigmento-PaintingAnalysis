@@ -42,7 +42,7 @@ def KM_mixing_rendering_global(img, Weights, KS, normalize_flag=1):
 
     if normalize_flag==0:
     	thickness=Weights.sum(axis=1).reshape((-1,1))
-    	# print thickness.max()
+    	# print(thickness.max())
     else:
     	thickness=1.0
 
@@ -195,10 +195,9 @@ class Recoloring_app:
 		self.mask=controller.mask
 
 		if self.mask is None:
-		    print "no input mask"
+		    print("no input mask")
 		else:
-		    print self.mask.shape
-
+		    print(self.mask.shape)
 		self.AllData=controller.AllData
 
 		self.canvas.pack(side="top", fill="both", expand=True)
@@ -419,10 +418,8 @@ class Recoloring_app:
 
 		self.user_select_indices=np.asarray([self.var_list['p-'+str(i)].get() for i in range(self.PigNum)])
 		self.user_select_indices_copy=self.user_select_indices.copy()
-		# print self.user_select_indices
-		# print self.user_select_indices_copy
-
-
+		# print(self.user_select_indices)
+		# print(self.user_select_indices_copy)
 	def update_status2(self):
 
 
@@ -430,19 +427,17 @@ class Recoloring_app:
 		
 
 		if self.var_change_pig.get()==1 or (self.var_change_pig.get()==0 and self.var_change_scattering.get()==0 and self.var_change_weights.get()==0):  ## this is needed by "recolor by changing pigments".
-			# print self.user_select_indices
-			# print self.user_select_indices_copy
+			# print(self.user_select_indices)
+			# print(self.user_select_indices_copy)
 			diff=self.user_select_indices-self.user_select_indices_copy
 
 			if len(diff[diff==1])!=0: ### only count from 0 becoming 1 status.
 				self.current_Extracted_pigments_index=np.arange(self.PigNum)[diff==1][0]
-				# print self.current_Extracted_pigments_index
-
+				# print(self.current_Extracted_pigments_index)
 			if self.var_for_all.get()==1 and len(diff[diff==-1])!=0:  ### click on pig when "all" button is checked.
 				self.current_Extracted_pigments_index=np.arange(self.PigNum)[diff==-1][0]
 				self.var_list['p-'+str(self.current_Extracted_pigments_index)].set(1)
-				# print self.current_Extracted_pigments_index
-
+				# print(self.current_Extracted_pigments_index)
 			for i in range(self.PigNum):
 				if i!=self.current_Extracted_pigments_index:
 					self.var_list['p-'+str(i)].set(0)
@@ -532,7 +527,7 @@ class Recoloring_app:
 	def Show_image(self, master, img, option=0):
 	    
 	    width,height=img.size
-	    # print width, height
+	    # print(width, height)
 	    if option==0:
 	        self.canvas = tk.Canvas(master, width=width, height=height, highlightthickness=0, borderwidth=0, cursor="cross")
 	        self.canvas.pack(side="top", fill="both", expand=True)
@@ -545,7 +540,7 @@ class Recoloring_app:
 
 		if self.var_change_pig.get()==1: ### recoloring by changing pigments.
 
-			# print self.current_Extracted_pigments_index
+			# print(self.current_Extracted_pigments_index)
 			new_scale=2**(self.KS_scales.get()-5)
 			self.Extracted_KS[self.current_Extracted_pigments_index,:]=self.AllData.Existing_KS[self.Existing_pigments_index.get(),:].copy()*new_scale
 
@@ -594,11 +589,10 @@ class Recoloring_app:
 		elif self.var_change_weights.get()==1: ### recoloring by changing weights.
 
 			new_scale=2**(self.weights_scales.get()-5)
-			# print new_scale
+			# print(new_scale)
 			user_chosed_ind_list=np.nonzero(self.user_select_indices)[0]
-			# print user_chosed_ind_list
-			# print self.normalize_flag.get()
-
+			# print(user_chosed_ind_list)
+			# print(self.normalize_flag.get())
 			self.KM_weights.reshape((-1,self.PigNum))[:,user_chosed_ind_list]=self.AllData.KM_weights.reshape((-1,self.PigNum))[:,user_chosed_ind_list]*new_scale
 
 			if self.var3.get()==0:  ### KM version
@@ -630,10 +624,9 @@ class Recoloring_app:
 			new_scale=2**(self.scatter_scales.get()-10)
 
 			user_chosed_ind_list=np.nonzero(self.user_select_indices)[0]
-			# print self.user_select_indices
-			# print new_scale
-			# print user_chosed_ind_list
-
+			# print(self.user_select_indices)
+			# print(new_scale)
+			# print(user_chosed_ind_list)
 			self.Extracted_KS[user_chosed_ind_list,L:]=self.AllData.KM_pigments[user_chosed_ind_list,L:]*new_scale
 
 			#### update color of primary pigments:
@@ -718,7 +711,7 @@ class Recoloring_app:
 		#### mouse based recoloring
 
 		cv2.circle(self.mouse_mask,(self.start_x,self.start_y),self.scribble_size.get(),1,-1)
-		# print len(self.mouse_mask[self.mouse_mask==1])
+		# print(len(self.mouse_mask[self.mouse_mask==1]))
 		if self.var2.get()==1:
 			self.Execute()
 

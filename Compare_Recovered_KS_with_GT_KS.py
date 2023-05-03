@@ -21,7 +21,7 @@ def solve_interpolation(gt_h, h):
     import scipy.optimize as sopt
     alpha=0.5
     res=sopt.least_squares(objective_func_vector, alpha, args=(gt_h, h), method='trf')
-    # print res["message"]
+    # print(res["message"])
     x0=res["x"]
 
     error=np.sqrt(objective_func(x0, gt_h, h))
@@ -34,7 +34,7 @@ def solve_interpolation(gt_h, h):
 def Test_Recovered_KS_with_GT_KS(gt_H, H, output_prefix, patch_reconstruct_RGB_RMSE_list):
     M=H.shape[0]
     L=H.shape[1]/2
-    print L
+    print(L)
     errors=np.ones(M)
     interpolations=np.ones(M)
     output_prefix2=output_prefix+"-error_histogram-display"
@@ -44,8 +44,7 @@ def Test_Recovered_KS_with_GT_KS(gt_H, H, output_prefix, patch_reconstruct_RGB_R
     # RGB_RMSE_thres=0.5
     RGB_RMSE_thres=patch_reconstruct_RGB_RMSE_list.max()
     # RGB_RMSE_thres=np.median(patch_reconstruct_RGB_RMSE_list)
-    print RGB_RMSE_thres
-
+    print(RGB_RMSE_thres)
     myfile = open(output_prefix2+'/display-pigments-whose_patch_RGB_RMSE_smaller_than-'+str(RGB_RMSE_thres)+'.html', 'w')
     myfile.write("<!DOCTYPE html>\n <html><body>\n")
 
@@ -68,10 +67,9 @@ def Test_Recovered_KS_with_GT_KS(gt_H, H, output_prefix, patch_reconstruct_RGB_R
                 interpolations[2*i+j]=interpolation
 
                 if interpolation <0 or interpolation>1:
-                    print i
-                    print error
-                    print interpolation
-
+                    print(i)
+                    print(error)
+                    print(interpolation)
                 projected_h=gt_h[0]*interpolation+gt_h[1]*(1-interpolation)
                 error_array=abs(h-projected_h)
                 error_ratio_array=error_array/projected_h
@@ -86,12 +84,10 @@ def Test_Recovered_KS_with_GT_KS(gt_H, H, output_prefix, patch_reconstruct_RGB_R
                 for ind in range(len(name_list)):
                     name=name_list[ind]
                     fig=plt.figure()
-                    # print gt_h[0,:L].shape
-                    # print xaxis.shape
-                    # print h[0,:L].shape
-                    # print error_array[0,:L].shape
-
-
+                    # print(gt_h[0,:L].shape)
+                    # print(xaxis.shape)
+                    # print(h[0,:L].shape)
+                    # print(error_array[0,:L].shape)
                     if ind==0:
                         plt.plot(xaxis, gt_h[0,:L], 'ro-', xaxis, gt_h[1,:L], 'rs-', xaxis, h[0,:L], 'b-', xaxis, projected_h[:L],'gx-')
 
@@ -119,11 +115,8 @@ def Test_Recovered_KS_with_GT_KS(gt_H, H, output_prefix, patch_reconstruct_RGB_R
 
     np.savetxt(output_prefix+"-distance-errors.txt", errors)
     np.savetxt(output_prefix+"-interpolation-values.txt", interpolations)
-    print errors.min()
-    print errors.max()
-
-
-
+    print(errors.min())
+    print(errors.max())
 def Test_Recovered_KS_with_GT_KS_one_pigment_per_patch(gt_H, H, output_prefix, patch_reconstruct_RGB_RMSE_list, gt_thickness_map, recover_thickness_map):
     M=H.shape[0]
     L=H.shape[1]/2
@@ -132,15 +125,12 @@ def Test_Recovered_KS_with_GT_KS_one_pigment_per_patch(gt_H, H, output_prefix, p
     make_sure_path_exists(output_prefix2)
     
     Num=len(gt_thickness_map.reshape(-1))/M #### pixel num in each patch
-    print gt_thickness_map.shape
-    print recover_thickness_map.shape
-
+    print(gt_thickness_map.shape)
+    print(recover_thickness_map.shape)
     # RGB_RMSE_thres=1.5
     RGB_RMSE_thres=patch_reconstruct_RGB_RMSE_list.max()
     # RGB_RMSE_thres=np.median(patch_reconstruct_RGB_RMSE_list)
-    print RGB_RMSE_thres
-
-
+    print(RGB_RMSE_thres)
     myfile = open(output_prefix2+'/display-pigments-whose_patch_RGB_RMSE_smaller_than-'+str(RGB_RMSE_thres)+'.html', 'w')
     myfile.write("<!DOCTYPE html>\n <html><body>\n")
 
@@ -155,7 +145,7 @@ def Test_Recovered_KS_with_GT_KS_one_pigment_per_patch(gt_H, H, output_prefix, p
 
             gt_h=gt_H[i:i+1]
             h=H[i:i+1]
-            size=np.int(sqrt(Num))
+            size=np.int32(sqrt(Num))
             gt_thick=gt_thickness_map[i*Num:i*Num+Num].reshape((size,size)) #### default patch shape is nbyn, Num=n^2.
             recover_thick=recover_thickness_map[i*Num:i*Num+Num].reshape((size,size))
         
@@ -216,9 +206,7 @@ def Test_Recovered_KS_with_GT_KS_one_variable_version(gt_H, H, output_prefix, pa
     # RGB_RMSE_thres=1.0
     RGB_RMSE_thres=patch_reconstruct_RGB_RMSE_list.max()
     # RGB_RMSE_thres=np.median(patch_reconstruct_RGB_RMSE_list)
-    print RGB_RMSE_thres
-
-
+    print(RGB_RMSE_thres)
     myfile = open(output_prefix2+'/display-pigments-whose_patch_RGB_RMSE_smaller_than-'+str(RGB_RMSE_thres)+'.html', 'w')
     myfile.write("<!DOCTYPE html>\n <html><body>\n")
 
@@ -242,10 +230,9 @@ def Test_Recovered_KS_with_GT_KS_one_variable_version(gt_H, H, output_prefix, pa
                 interpolations[2*i+j]=interpolation
 
                 if interpolation <0 or interpolation>1:
-                    print i
-                    print error
-                    print interpolation
-
+                    print(i)
+                    print(error)
+                    print(interpolation)
                 projected_h=gt_h[0]*interpolation+gt_h[1]*(1-interpolation)
                 error_array=abs(h-projected_h)
                 error_ratio_array=error_array/projected_h
@@ -282,14 +269,8 @@ def Test_Recovered_KS_with_GT_KS_one_variable_version(gt_H, H, output_prefix, pa
 
     np.savetxt(output_prefix+"-distance-errors.txt", errors)
     np.savetxt(output_prefix+"-interpolation-values.txt", interpolations)
-    print errors.min()
-    print errors.max()
-
-
-
-
-
-
+    print(errors.min())
+    print(errors.max())
 ##### This is for visualizing the recovered KS and gt KS in same figure per pigments. 
 def Visualize_Recovered_KS_with_GT_KS(gt_H, H, path):
     M=H.shape[0]
@@ -311,7 +292,7 @@ def Visualize_Recovered_KS_with_GT_KS(gt_H, H, path):
 
 
 #### rendering recovered pigments
-    print "model: ", MODEL
+    print("model: ", MODEL)
     R0=equations_in_RealPigments(K0, S0, r=1.0, h=1.0, model=MODEL)
     P0=R0*Illuminantnew[:,1].reshape((1,-1))
     R_xyz=(P0.reshape((-1,1,L))*R_xyzcoeff.reshape((1,3,L))).sum(axis=2)
@@ -354,8 +335,7 @@ def Visualize_Recovered_KS_with_GT_KS(gt_H, H, path):
     R0=R0[final_permut]
     R_rgb=R_rgb[final_permut]
     
-    print "final_permut: ", final_permut
-
+    print("final_permut: ", final_permut)
     Pigment=(R_rgb.reshape((-1,1,3))*255.0).round().astype(np.uint8)
 
 
@@ -442,7 +422,7 @@ def Visualize_Recovered_KS_with_GT_KS_one_variable_version(gt_H, H, path):
 
 
 #### rendering recovered pigments
-    print "model: ", MODEL
+    print("model: ", MODEL)
     R0=equations_in_RealPigments(KS0, np.ones((M,L))*S_Constant, r=1.0, h=1.0, model=MODEL)
     P0=R0*Illuminantnew[:,1].reshape((1,-1))
     R_xyz=(P0.reshape((-1,1,L))*R_xyzcoeff.reshape((1,3,L))).sum(axis=2)
@@ -552,22 +532,19 @@ if __name__=="__main__":
     recovered_H_name=sys.argv[2]
     output_prefix=sys.argv[3]
     patch_reconstruct_RGB_RMSE_list_file_name=sys.argv[4]
-    task_choice=np.int(sys.argv[5])
+    task_choice=np.int32(sys.argv[5])
 
 
     gt_H=np.loadtxt(gt_H_name)
-    print gt_H.shape
+    print(gt_H.shape)
     recovered_H=np.loadtxt(recovered_H_name)
-    print recovered_H.shape
-    
+    print(recovered_H.shape)
     patch_reconstruct_RGB_RMSE_list=None
     if patch_reconstruct_RGB_RMSE_list_file_name!="None":
         patch_reconstruct_RGB_RMSE_list=np.loadtxt(patch_reconstruct_RGB_RMSE_list_file_name).reshape(-1)
-        print patch_reconstruct_RGB_RMSE_list.max()
-        print patch_reconstruct_RGB_RMSE_list.min()
-        print np.median(patch_reconstruct_RGB_RMSE_list)
-
-
+        print(patch_reconstruct_RGB_RMSE_list.max())
+        print(patch_reconstruct_RGB_RMSE_list.min())
+        print(np.median(patch_reconstruct_RGB_RMSE_list))
     if task_choice==1:
         Visualize_Recovered_KS_with_GT_KS(gt_H, recovered_H, output_prefix)
 

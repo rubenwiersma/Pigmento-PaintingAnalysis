@@ -45,11 +45,11 @@ class BilateralGrid(object):
         self.nvertices = len(unique_coords)
         # Construct sparse splat matrix that maps from pixels to vertices
         self.S = csr_matrix((np.ones(self.npixels), (idx, np.arange(self.npixels))))
-        # print self.S.shape
+        # print(self.S.shape)
         # Construct sparse blur matrices.
         # Note that these represent [1 0 1] blurs, excluding the central element
         self.blurs = []
-        for d in xrange(self.dim):
+        for d in range(self.dim):
             blur = 0.0
             for offset in (-1,0,1):
                 offset_vec = np.zeros((1, self.dim))
@@ -96,7 +96,7 @@ def bistochastize(grid, maxiter=50):
     """Compute diagonal matrices to bistochastize a bilateral grid"""
     m = grid.splat(np.ones(grid.npixels))
     n = np.ones(grid.nvertices)
-    for i in xrange(maxiter):
+    for i in range(maxiter):
         n = np.sqrt(n * m / grid.blur(n))
     # Correct m to satisfy the assumption of bistochastization regardless
     # of how many iterations have been run.
@@ -124,10 +124,9 @@ def generate_Bilateral_Matrix_hat_1(img, sigma_spatial=8, sigma_luma=4, sigma_ch
     r=np.ones((N,1))
     for i in range(iters):
         c=1.0/(W.T.dot(r))
-        # print c.shape
+        # print(c.shape)
         r=1.0/(W.dot(c))
-        # print r.shape
-
+        # print(r.shape)
     C=diags(c.flatten(),0)
     R=diags(r.flatten(),0)
     W_hat=R.dot(W.dot(C))
@@ -169,9 +168,7 @@ if __name__=="__main__":
     
     img=img[::2,::2]
     im_shape=img.shape[:2]
-    print im_shape
-
-
+    print(im_shape)
     grid_params = {
         'sigma_luma' : 4, # Brightness bandwidth
         'sigma_chroma': 4, # Color bandwidth
@@ -182,28 +179,21 @@ if __name__=="__main__":
     t1=time.time()
     grid = BilateralGrid(img, **grid_params)
     t2=time.time()
-    print t2-t1
-
+    print(t2-t1)
     Bilateral_matrix=generate_Bilateral_matrix(img, **grid_params)
-    print Bilateral_matrix.shape
-
+    print(Bilateral_matrix.shape)
     Bilateral_matrix_hat=generate_Bilateral_Matrix_hat_2(img, **grid_params)
-    print Bilateral_matrix_hat.shape
-   
-    print Bilateral_matrix
-    print abs(Bilateral_matrix.T-Bilateral_matrix).sum()
-    print "###"
-    print Bilateral_matrix_hat
+    print(Bilateral_matrix_hat.shape)
+    print(Bilateral_matrix)
+    print(abs(Bilateral_matrix.T-Bilateral_matrix).sum())
+    print("###")
+    print(Bilateral_matrix_hat)
     diff=Bilateral_matrix_hat.T-Bilateral_matrix_hat
-    print abs(diff).sum()
-    print abs(diff).max()
-    print abs(diff).min()
+    print(abs(diff).sum())
+    print(abs(diff).max())
+    print(abs(diff).min())
     N=img.shape[0]*img.shape[1]
-    print abs(Bilateral_matrix_hat.dot(np.ones(N))).sum()
-    print abs(Bilateral_matrix_hat.T.dot(np.ones(N))).sum()
+    print(abs(Bilateral_matrix_hat.dot(np.ones(N))).sum())
+    print(abs(Bilateral_matrix_hat.T.dot(np.ones(N))).sum())
     t3=time.time()
-    print t3-t2
-
-
-
-
+    print(t3-t2)

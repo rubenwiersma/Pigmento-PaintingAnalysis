@@ -35,9 +35,7 @@ class Grabcut_app:
         self.PigNum=self.KM_weights_data.shape[-1]
         self.KM_weights_data_imgs=(self.KM_weights_data*255.0).round().clip(0,255).astype(np.uint8)
         self.KM_weights_data_imgs_copy=self.KM_weights_data_imgs.copy()
-        print self.KM_weights_data_imgs.shape
-
-
+        print(self.KM_weights_data_imgs.shape)
         self.PD_weights_data=self.AllData.PD_weights
         self.PD_weights_data_imgs=(self.PD_weights_data*255.0).round().clip(0,255).astype(np.uint8)
         self.PD_weights_data_imgs_copy=self.PD_weights_data_imgs.copy()
@@ -52,7 +50,7 @@ class Grabcut_app:
         self.mask_copy=self.mask.copy()
         self.masklist = np.zeros((row,col,N), dtype=np.uint8)
         self.masklist[:,:,:]=self.mask_copy.reshape((self.mask_copy.shape[0],self.mask_copy.shape[1],1))
-        # print self.masklist.shape
+        # print(self.masklist.shape)
         self.finalmasklist=self.masklist.copy()
 
         self.new_master=None
@@ -160,19 +158,17 @@ class Grabcut_app:
         
 
         if self.var_showing_our_data.get()==1:
-            # print self.user_select_indices
-            # print self.user_select_indices_copy
+            # print(self.user_select_indices)
+            # print(self.user_select_indices_copy)
             diff=self.user_select_indices-self.user_select_indices_copy
 
             if len(diff[diff==1])!=0: ### only count from 0 becoming 1 status.
                 self.current_Extracted_pigments_index=np.arange(self.PigNum)[diff==1][0]
-                # print self.current_Extracted_pigments_index
-
+                # print(self.current_Extracted_pigments_index)
             if self.var_for_all.get()==1 and len(diff[diff==-1])!=0:  ### click on pig when "all" button is checked.
                 self.current_Extracted_pigments_index=np.arange(self.PigNum)[diff==-1][0]
                 self.var_list['p-'+str(self.current_Extracted_pigments_index)].set(1)
-                # print self.current_Extracted_pigments_index
-
+                # print(self.current_Extracted_pigments_index)
             for i in range(self.PigNum):
                 if i!=self.current_Extracted_pigments_index:
                     self.var_list['p-'+str(i)].set(0)
@@ -279,8 +275,8 @@ class Grabcut_app:
         else:
             N=M/3
         
-        # print self.KM_weights_data_imgs.shape
-        # print self.mask.shape
+        # print(self.KM_weights_data_imgs.shape)
+        # print(self.mask.shape)
         self.mask_copy=self.mask.copy()
         self.masklist = np.zeros((row,col,N), dtype=np.uint8)
         self.masklist[:,:,:]=self.mask_copy.reshape((self.mask_copy.shape[0],self.mask_copy.shape[1],1))
@@ -305,7 +301,7 @@ class Grabcut_app:
     def Show_image(self, master, img, option=0):
         
         width,height=img.size
-        # print width, height
+        # print(width, height)
         if option==0:
             self.canvas = tk.Canvas(master, width=width, height=height, highlightthickness=0, borderwidth=0, cursor="cross")
             self.canvas.pack(side="top", fill="both", expand=True)
@@ -337,27 +333,22 @@ class Grabcut_app:
 
 
         elif self.var3.get()==1: ### use our KM weights
-            # print self.var3.get()
-            
+            # print(self.var3.get())
             self.KM_weights_data_imgs=self.KM_weights_data_imgs_copy[:,:,np.nonzero(self.user_select_indices)[0]].reshape((self.KM_weights_data_imgs_copy.shape[0], self.KM_weights_data_imgs_copy.shape[1], -1))
             
-            # print self.user_select_indices
-            # print self.KM_weights_data_imgs.shape
-
+            # print(self.user_select_indices)
+            # print(self.KM_weights_data_imgs.shape)
             row,col,M=self.KM_weights_data_imgs.shape
-            # print self.rect_or_mask
-            
+            # print(self.rect_or_mask)
             if (M%3)!=0:
                 N=M/3+1
             else:
                 N=M/3
             
 
-            print self.rect_or_mask
-            print N
-            print self.masklist.shape
-
-
+            print(self.rect_or_mask)
+            print(N)
+            print(self.masklist.shape)
             if self.rect_or_mask == 0:         # grabcut with rect
                 
 
@@ -405,16 +396,13 @@ class Grabcut_app:
 
 
         elif self.var3.get()==2: ### use PD weights
-            # print self.var3.get()
-            
+            # print(self.var3.get())
             self.PD_weights_data_imgs=self.PD_weights_data_imgs_copy[:,:,np.nonzero(self.user_select_indices)[0]].reshape((self.PD_weights_data_imgs_copy.shape[0], self.PD_weights_data_imgs_copy.shape[1], -1))
             
-            # print self.user_select_indices
-            # print self.PD_weights_data_imgs.shape
-
+            # print(self.user_select_indices)
+            # print(self.PD_weights_data_imgs.shape)
             row,col,M=self.PD_weights_data_imgs.shape
-            # print self.rect_or_mask
-            
+            # print(self.rect_or_mask)
             if (M%3)!=0:
                 N=M/3+1
             else:
@@ -472,8 +460,7 @@ class Grabcut_app:
         # #### show results in other window.
         img=Image.fromarray(self.finalmask).convert('L')
         width,height=img.size
-        # print img.size
-
+        # print(img.size)
         if self.showing==0:
             self.new_master=tk.Toplevel()
             self.new_master.title('Grabcut_results')

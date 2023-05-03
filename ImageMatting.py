@@ -145,15 +145,14 @@ if __name__=="__main__":
     Saveresults_name='./data/Results/'+ os.path.splitext(sys.argv[1])[0]+'-'+sys.argv[2]+'-Alphas-'
     Option=sys.argv[3]
     Choice=sys.argv[4]
-    WinSize=np.int(sys.argv[5])
+    WinSize=np.int32(sys.argv[5])
     Std=1.0
     if Option=="Gaussiankernel":
-        Std=np.float(sys.argv[6])
+        Std=np.float64(sys.argv[6])
 
-    print "Current Trimap used: ", Trimap_name
-    print "Options: ", Option
-    print "Choices: ", Choice
-
+    print("Current Trimap used: ", Trimap_name)
+    print("Options: ", Option)
+    print("Choices: ", Choice)
     _Img=cv2.imread(Img_name)
     Total_pixels=_Img.shape[0]*_Img.shape[1]
 
@@ -167,14 +166,10 @@ if __name__=="__main__":
         Alpha=(Alpha*255).astype(np.uint8)
         cv2.imwrite(Saveresults_name+Option+"-"+Choice+".png", Alpha)
         Diff=Alpha-Alpha_gt
-        print "RMSE:", np.sqrt(np.square(Diff).sum()/Total_pixels)
-
+        print("RMSE:", np.sqrt(np.square(Diff).sum()/Total_pixels))
     if Option=="Gaussiankernel":
         Alpha=Image_Matting_By_Learning(Img, Trimap, WinSize=WinSize, Options=Option, s=Std)
         Alpha=(Alpha*255).astype(np.uint8)
         cv2.imwrite(Saveresults_name+Option+"-Std-"+str(Std)+"-"+Choice+".png", Alpha)
         Diff=Alpha-Alpha_gt
-        print "Std:", Std, "\tRMSE:", np.sqrt(np.square(Diff).sum()/Total_pixels)
-
-
-
+        print("Std:", Std, "\tRMSE:", np.sqrt(np.square(Diff).sum()/Total_pixels))

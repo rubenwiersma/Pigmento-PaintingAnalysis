@@ -34,8 +34,8 @@ def objective_func_vector_fixed_KS(x0, arr, H, Smooth_Matrix, W_w=2.0, W_sparse=
     
     eps=1e-15
     M=H.shape[0]
-    L=H.shape[1]/2
-    N=len(x0)/M
+    L=H.shape[1]//2
+    N=len(x0)//M
     W=x0.reshape((N,M))
 
 
@@ -137,7 +137,7 @@ def Large_KS_value_penalty(KS_list):
 def objective_func_vector_fixed_Weights(x0, arr, Weights, W_sm_K, W_sm_S, W_sm_KS):
     
     M=Weights.shape[1]
-    L=len(x0)/(2*M)
+    L=len(x0)//(2*M)
 
     N=Weights.shape[0]
 
@@ -212,21 +212,21 @@ def gradient_objective_func_fixed_Weights(x0, arr, W, W_sm_K, W_sm_S, W_sm_KS):
 def optimize(arr, x0, H, Smooth_Matrix, saver=None, W_w=2.0, W_sparse=0.1, W_spatial=0.0, method='L-BFGS-B'):
     arr_shape=arr.shape
     N=arr_shape[0]*arr_shape[1]
-    M=len(x0)/N
-    L=H.shape[1]/2
+    M=len(x0)//N
+    L=H.shape[1]//2
     lb=1e-15
     ub=1.0
 
     #### bounds0 are for least_squares function parameters.
     bounds0=(lb, ub)
     bounds3=[]
-    for i in xrange(len(x0)):
+    for i in range(len(x0)):
         bounds3.append((lb,ub))
 
     x0[x0<lb]=lb
 
 
-    start_time=time.clock()
+    start_time=time.perf_counter()
     if method=='trf':
         if use_autograd==False:
             res=sopt.least_squares(objective_func_vector_fixed_KS, x0, args=(arr, H, Smooth_Matrix, W_w, W_sparse, W_spatial), bounds=bounds0, jac='2-point', method='trf')   
@@ -240,7 +240,7 @@ def optimize(arr, x0, H, Smooth_Matrix, saver=None, W_w=2.0, W_sparse=0.1, W_spa
             # res=sopt.minimize(objective_func_fixed_KS, x0, args=(arr, H, Smooth_Matrix, W_w, W_sparse, W_spatial), bounds=bounds3, method=method, jac=gradient_objective_func_fixed_KS, callback=saver)
             res=sopt.minimize(objective_func_fixed_KS, x0, args=(arr, H, Smooth_Matrix, W_w, W_sparse, W_spatial), bounds=bounds3, method=method, jac=gradient_objective_func_fixed_KS, callback=saver,options={'gtol':1e-4, 'ftol': 1e-4})
 
-    end_time=time.clock()
+    end_time=time.perf_counter()
     # print 'Optimize variables of size ', x0.shape, ' took ', (end_time-start_time), ' seconds.'
     x=res["x"]
 
@@ -254,7 +254,7 @@ def optimize_fixed_Weights(x0, arr, W, W_sm_K, W_sm_S, W_sm_KS, method='L-BFGS-B
     arr_shape=arr.shape
     N=arr_shape[0]*arr_shape[1]
     M=W.shape[1]
-    L=len(x0)/(2*M)
+    L=len(x0)//(2*M)
 
     eps=1e-8
     x0[x0<eps]=eps
@@ -263,11 +263,11 @@ def optimize_fixed_Weights(x0, arr, W, W_sm_K, W_sm_S, W_sm_KS, method='L-BFGS-B
     bounds0=(eps, np.inf)
 
     bounds3=[]
-    for i in xrange(len(x0)):
+    for i in range(len(x0)):
         bounds3.append((eps,None))
 
 
-    start_time=time.clock()
+    start_time=time.perf_counter()
     if method=='trf':
         if use_autograd==False:
             res=sopt.least_squares(objective_func_vector_fixed_Weights, x0, args=(arr, W, W_sm_K, W_sm_S, W_sm_KS), bounds=bounds0,jac='2-point', method='trf')   
@@ -282,7 +282,7 @@ def optimize_fixed_Weights(x0, arr, W, W_sm_K, W_sm_S, W_sm_KS, method='L-BFGS-B
 
 
 
-    end_time=time.clock()
+    end_time=time.perf_counter()
 
     x=res["x"]
     # print res["message"]
@@ -297,13 +297,13 @@ def save_results(x0, arr, H, output_prefix):
     img_size=shape[:2]
     N=shape[0]*shape[1]
     M=H.shape[0]
-    L=H.shape[1]/2
+    L=H.shape[1]//2
 
     Weights=x0.reshape((N,M))
     K0=H[:,:L]
     S0=H[:,L:]
-    print Weights.sum(axis=1).min()
-    print Weights.sum(axis=1).max()
+    print(Weights.sum(axis=1).min())
+    print(Weights.sum(axis=1).max())
 
     ### reconstruction of input
     R_vector=KM_mixing_multiplepigments(K0, S0, Weights, r=1.0, h=1.0)
@@ -315,7 +315,7 @@ def save_results(x0, arr, H, output_prefix):
     R_rgb=np.dot(xyztorgb,R_xyz.transpose()).transpose() ###linear rgb value, shape is N*3
     R_rgb=Gamma_trans_img(R_rgb.clip(0,1)) ##clip and gamma correction
     
-    print 'RGB RMSE: ', np.sqrt(np.square(255*(arr.reshape((-1,3))-R_rgb)).sum()/N)
+    print('RGB RMSE: ', np.sqrt(np.square(255*(arr.reshape((-1,3))-R_rgb)).sum()/N))
     
     filename=output_prefix+"fixed_KS-reconstructed.png"
     plt.imsave(filename,(R_rgb.reshape(original_shape)*255.0).clip(0,255).round().astype(np.uint8))
@@ -325,16 +325,16 @@ def save_results(x0, arr, H, output_prefix):
     ### compute sparsity
     sparsity_thres_array=np.array([0.000001, 0.00001, 0.0001,0.001,0.01,0.1])
     Weights_sparsity_list=np.ones(len(sparsity_thres_array))
-    for thres_ind in xrange(len(sparsity_thres_array)):
+    for thres_ind in range(len(sparsity_thres_array)):
         Weights_sparsity_list[thres_ind]=len(Weights[Weights<=sparsity_thres_array[thres_ind]])*1.0/(N*M)
     
-    print "Weights_sparsity_list: ", Weights_sparsity_list
+    print("Weights_sparsity_list: ", Weights_sparsity_list)
     np.savetxt(output_prefix+"mixing_weights-Sparsity.txt", Weights_sparsity_list)
 
 
 
     # normalized_Weights=Weights/Weights.sum(axis=1).reshape((-1,1))
-    # for i in xrange(M):
+    # for i in range(M):
     #     #### save normalized_weights_map for each pigment.
     #     normalized_weights_map_name=output_prefix+"normalized_mixing_weights_map-%02d.png" % i
     #     normalized_Weights_map=normalized_Weights[:,i].reshape(img_size).copy()
@@ -351,7 +351,7 @@ def save_results(x0, arr, H, output_prefix):
 
 
 
-    for i in xrange(M):
+    for i in range(M):
         #### save weights_map for each pigment.
         weights_map_name=output_prefix+"mixing_weights_map-%02d.png" % i
         Weights_map=Weights[:,i].reshape(img_size).copy()
@@ -414,7 +414,7 @@ def save_results_2(x0, arr_shape, H, output_prefix):
     # ## compute sparsity
     # # sparsity_thres_array=np.array([0.000001, 0.00001, 0.0001,0.001,0.01,0.1])
     # # Weights_sparsity_list=np.ones(len(sparsity_thres_array))
-    # # for thres_ind in xrange(len(sparsity_thres_array)):
+    # # for thres_ind in range(len(sparsity_thres_array)):
     # #     Weights_sparsity_list[thres_ind]=len(Weights[Weights<=sparsity_thres_array[thres_ind]])*1.0/(N*M)
     
     # # print "Weights_sparsity_list: ", Weights_sparsity_list
@@ -423,7 +423,7 @@ def save_results_2(x0, arr_shape, H, output_prefix):
 
 
     # # normalized_Weights=Weights/Weights.sum(axis=1).reshape((-1,1))
-    # # for i in xrange(M):
+    # # for i in range(M):
     # #     #### save normalized_weights_map for each pigment.
     # #     normalized_weights_map_name=output_prefix+"-normalized_mixing_weights_map-%02d.png" % i
     # #     normalized_Weights_map=normalized_Weights[:,i].reshape(img_size).copy()
@@ -438,7 +438,7 @@ def save_results_2(x0, arr_shape, H, output_prefix):
     # # cv2.imwrite(output_prefix+"-mixing_weights_sum_map-min-"+str(W_min)+"-max-"+str(W_max)+".png", (Weights_sum_map*255.0).round().astype(np.uint8))
         
 
-    # for i in xrange(M):
+    # for i in range(M):
     #     #### save weights_map for each pigment.
     #     weights_map_name=output_prefix+"-mixing_weights_map-%02d.png" % i
     #     Weights_map=Weights[:,i].reshape(img_size).copy()
@@ -452,7 +452,7 @@ def save_results_2(x0, arr_shape, H, output_prefix):
 
 def save_pigments(x_H, M, output_dir):
 
-    L=len(x_H)/(2*M)
+    L=len(x_H)//(2*M)
     x_H=x_H.reshape((M,-1))
 
     np.savetxt(output_dir+"primary_pigments_KS-"+str(M)+".txt", x_H)
@@ -478,7 +478,7 @@ def save_pigments(x_H, M, output_dir):
     C=3 ## channel number
     w=h=50
     pigments=np.ones((w,h*M,C))
-    for i in xrange(M):
+    for i in range(M):
         pigments[:,i*h:i*h+h]=R_rgb[i]
 
     plt.imsave(output_dir+"primary_pigments_color-"+str(M)+".png", (pigments*255.0).round().astype(np.uint8))
@@ -503,7 +503,7 @@ def save_pigments(x_H, M, output_dir):
 
   
     xaxis=np.arange(L)
-    for i in xrange(M):
+    for i in range(M):
         fig=plt.figure()
         plt.plot(xaxis, K0[i], 'b-')
         fig.savefig(output_dir+"primary_pigments_K_curve-"+str(i)+".png")
@@ -545,7 +545,7 @@ def Unique_colors_pixel_mapping(img_data): ### shape is row*col*channel
         # colors2count[tuple(element)]=0
         colors2xy.setdefault(tuple(element),[])
         
-    for index in xrange(len(new_data)):
+    for index in range(len(new_data)):
         element=new_data[index]
         # colors2count[tuple(element)]+=1
         colors2xy[tuple(element)].append(index)
@@ -610,7 +610,7 @@ def create_cross_bilateral(arr, M):
 def From_wegihts_for_compositedPigments_to_weights_for_uniqueColors(UNIQ_foat, H, prior_mixing_weights):
     N1=len(UNIQ_foat)
     M=H.shape[0]
-    L=H.shape[1]/2
+    L=H.shape[1]//2
 
     if prior_mixing_weights==None:
         Final_weights=np.random.random_sample((N1,M))
@@ -637,7 +637,7 @@ def From_wegihts_for_compositedPigments_to_weights_for_uniqueColors(UNIQ_foat, H
         diff=np.square(diff).sum(axis=2) ### shape is (N1,N)
         min_indices=np.argmin(diff,axis=1)#### shape is (N1,)
         
-        for i in xrange(N1):
+        for i in range(N1):
             Final_weights[i]=prior_mixing_weights[min_indices[i]]
 
 
@@ -649,19 +649,19 @@ kSaveEverySeconds = 10
 last_save = [ None, None, None ]
 def reset_saver( arr_shape ):
     last_save[0] = 0
-    last_save[1] = time.clock()
+    last_save[1] = time.perf_counter()
     last_save[2] = arr_shape
 def saver( xk):
     arr_shape = last_save[2]
     last_save[0] += 1
-    now = time.clock()
+    now = time.perf_counter()
     ## Save every 10 seconds!
     if now - last_save[1] > kSaveEverySeconds:
-        print 'Iteration', last_save[0]
+        print('Iteration', last_save[0])
         save_results_2(xk, arr_shape, H, output_prefix)
         ## Get the time again instead of using 'now', because that doesn't take into
         ## account the time to actually save the images, which is a lot for large images.
-        last_save[1] = time.clock()
+        last_save[1] = time.perf_counter()
 
 
 import scipy.ndimage
@@ -692,7 +692,7 @@ def optimize_smaller_whole(large_arr, large_Y0, level, smooth_choice):
     
 
     ## solve on the downsampled problem
-    print '==> Optimizing on a smaller image:', small_arr.shape, 'instead of', large_arr.shape
+    print('==> Optimizing on a smaller image:', small_arr.shape, 'instead of', large_arr.shape)
     
     arr_shape=(small_arr.shape[0],small_arr.shape[1])
 
@@ -709,18 +709,18 @@ def optimize_smaller_whole(large_arr, large_Y0, level, smooth_choice):
         Smooth_Matrix=Blf
 
     else:
-        print "Error! No such choice!"
+        print("Error! No such choice!")
 
 
 
     time1=time.time()
-    print "compute smooth matrix time: ", time1-time0
+    print("compute smooth matrix time: ", time1-time0)
 
     reset_saver(small_arr.shape)
     small_Y = optimize(small_arr, small_Y1, H, Smooth_Matrix, saver=saver, W_w=W_w, W_sparse=W_sparse, W_spatial=W_spatial, method='L-BFGS-B')
     saver(small_Y.reshape(-1))
     time2=time.time()
-    print 'this level use time: ', time2-time1
+    print('this level use time: ', time2-time1)
     # save_layers(small_Y.reshape(-1), small_arr, H, output_prefix+"-recursivelevel-"+str(level))
 
     level+=1
@@ -739,12 +739,6 @@ def optimize_smaller_whole(large_arr, large_Y0, level, smooth_choice):
     return large_Y1.ravel(), level
 
 
-
-
-from joblib import Parallel, delayed
-import multiprocessing
-
-
 def per_pixel_solve(i, pixel, z0, initial, H, W_w, W_sparse, W_spatial, method='trf'):
     # if i%10000==0:
     #     print "pixel: ", i
@@ -760,21 +754,20 @@ def KM_solve_ANLS(arr, W, H, output_prefix, max_loop, W_w, W_sparse, W_spatial, 
     method1='L-BFGS-B'
     method2='trf'
     M=H.shape[0]
-    N=len(W.reshape(-1))/M
+    N=len(W.reshape(-1))//M
     R=arr.reshape((-1,3))
-    L=H.shape[-1]/2
+    L=H.shape[-1]//2
     
     final_loop=0
     x0=W.reshape((-1,M))
-    num_cores = multiprocessing.cpu_count()
     thres=0.1
 
-    for loop in xrange(max_loop):
+    for loop in range(max_loop):
 
         if W_spatial==0.0:
             # x1 = np.memmap(output_prefix+"-results",shape=(N,M), mode='w+', dtype=np.float64)
             # x1[:,:]=x0[:,:]
-            # Parallel(n_jobs=num_cores)(delayed(per_pixel_solve)(i, R[i], x1, x0[i], H, W_w, W_sparse, W_spatial, method=method1) for i in xrange(N))
+            # Parallel(n_jobs=num_cores)(delayed(per_pixel_solve)(i, R[i], x1, x0[i], H, W_w, W_sparse, W_spatial, method=method1) for i in range(N))
             # x0=x1.copy()
             Smooth_Matrix=None
 
@@ -815,14 +808,14 @@ def KM_solve_ANLS(arr, W, H, output_prefix, max_loop, W_w, W_sparse, W_spatial, 
             final_loop=loop
             
             if max_diff_ratio<=thres:
-                print "Two iteration's H abs difference ratio's maximum value is smaller than "+str(thres)+" after "+str(loop)+" iterations"
+                print("Two iteration's H abs difference ratio's maximum value is smaller than "+str(thres)+" after "+str(loop)+" iterations")
                 thres=thres/10
 
             if max_diff_ratio<=1e-3 or loop==(max_loop-2):
-                print max_diff_ratio
+                print(max_diff_ratio)
                 abs_diff=abs(diff).reshape((M,-1))
-                print "Fianl H's abs diff with last iteration's H:\n", abs_diff
-                print "total iterations: ", loop
+                print("Fianl H's abs diff with last iteration's H:\n", abs_diff)
+                print("total iterations: ", loop)
                 # K_diff=abs_diff[:,:L]
                 # print K_diff.max()
                 # S_diff=abs_diff[:,L:]
@@ -884,7 +877,7 @@ def Pallete_selection_Chang(image, M):
 
 
 def choose_good_initial_H_from_existing_H(image, arr, Existing_H, M, representative_color_choice=0, choose_corresponding_existing_KS_RGB_color_choice=0, output_prefix=None):
-    L=Existing_H.shape[-1]/2
+    L=Existing_H.shape[-1]//2
     H=np.ones((M,2*L))
     RGB_colors=np.ones((M,1,3))
     data=arr.reshape((-1,3))
@@ -902,15 +895,16 @@ def choose_good_initial_H_from_existing_H(image, arr, Existing_H, M, representat
         hull=ConvexHull(data)
         write_convexhull_into_obj_file(hull, output_rawhull_obj_file)
         N=500
-        mesh=TriMesh.FromOBJ_FileName(output_rawhull_obj_file)
+        vertices = hull.points[hull.vertices]
+        hull_to_vertex_idx = np.zeros(hull.points.shape[0], dtype=np.int32)
+        hull_to_vertex_idx[hull.vertices] = np.arange(len(hull.vertices))
+        faces = hull_to_vertex_idx[hull.simplices]
+        mesh = Mesh(vertices, faces)
         for i in range(N):
-            old_num=len(mesh.vs)
-            mesh=TriMesh.FromOBJ_FileName(output_rawhull_obj_file)
-            mesh=remove_one_edge_by_finding_smallest_adding_volume_with_test_conditions(mesh,option=2)
-            newhull=ConvexHull(mesh.vs)
-            write_convexhull_into_obj_file(newhull, output_rawhull_obj_file)
+            mesh=edge_contract_smallest_added_volume(mesh)
+            newhull=ConvexHull(mesh.vertices)
 
-            if len(mesh.vs)==M:
+            if len(mesh.vertices)==M:
                 Final_hull=newhull
                 break
 
@@ -954,7 +948,7 @@ def choose_good_initial_H_from_existing_H(image, arr, Existing_H, M, representat
         subprocess.call(['/Users/jianchao/Documents/Research/Adobe_Jianchao/Brushstroke_Project/Adobe_inside/CODE/pigment-parameters-newVersion/new_pipeline_executable/cgal_alpha_shape/executable', output_prefix+"/temp_data.txt", output_prefix+"/temp_data-alpha_shape"])
         
         data=np.loadtxt(output_prefix+"/temp_data-alpha_shape-vertices.txt")/255.0
-        print data.shape
+        print(data.shape)
 
 
         
@@ -1026,7 +1020,7 @@ def choose_good_initial_H_from_existing_H(image, arr, Existing_H, M, representat
         for i in range(M):
             min_diff[i]=diff[min_indices[i],i]
 
-        print min_indices
+        print(min_indices)
         
         for i in range(M-1):
             for j in range(i+1,M):
@@ -1080,7 +1074,7 @@ def choose_good_initial_H_from_existing_H(image, arr, Existing_H, M, representat
         
 
         Num=len(Existing_H)
-        Existing_H_expand=np.zeros((Num+Num*(Num-1)/2, Existing_H.shape[1]))
+        Existing_H_expand=np.zeros((Num+Num*(Num-1)//2, Existing_H.shape[1]))
         Existing_H_expand[:Num,:]=Existing_H
         count=0
         for i in range(Num-1):
@@ -1137,7 +1131,7 @@ def choose_good_initial_H_from_existing_H(image, arr, Existing_H, M, representat
 
         def obj_func_vector(x0, Hull_vertices, cova, W_Mahalanobis, W_sm_K, W_sm_S, W_sm_KS):
             M=Hull_vertices.shape[0]
-            L=len(x0)/(2*M)
+            L=len(x0)//(2*M)
             x_H=x0.reshape((M,2*L))
 
             K0=x_H[:,:L]
@@ -1377,12 +1371,12 @@ def sample_RGBcolors_new(RGB_colors, sample_num, bin_num=16):
     hull=ConvexHull(data)
     vertices=hull.points[hull.vertices]
     vertices_num=len(vertices)
-    print vertices_num
+    print(vertices_num)
 
     return vertices.reshape((-1,1,3)).astype(np.uint8) ####  directly use hull vertices to be sampled pixels
 
     if vertices_num>sample_num:
-        print "Already increase sample pixel number to 900"
+        print("Already increase sample pixel number to 900")
         sample_num=900
         
     sample_pixels=np.ones((sample_num,1, 3), dtype=np.uint8)
@@ -1419,7 +1413,7 @@ def sample_RGBcolors_new_use_avg_color_in_each_bin(RGB_colors, bin_num=16):
     # print count_colors.min()
     # print count_colors.max()
     NonEmptyNum=bin_list_num-len(count_colors[count_colors==0]) #### number of bins that contain at least one color of input image.
-    print NonEmptyNum
+    print(NonEmptyNum)
         
     i=0
     sample_RGB_colors=np.zeros((NonEmptyNum,1,3),dtype=np.uint8)
@@ -1461,27 +1455,27 @@ if __name__=="__main__":
     img_file=sys.argv[1]
 
     KS_file_name=sys.argv[2]
-    KS_choice=np.float(sys.argv[3]) #### 0 means input KS is not speficied. 1 means input is some choosed KS. 2 means input is 26 existing KS, so need choose M KS later.
+    KS_choice=np.float64(sys.argv[3]) #### 0 means input KS is not speficied. 1 means input is some choosed KS. 2 means input is 26 existing KS, so need choose M KS later.
     Weights_file_name=sys.argv[4]
     output_prefix=sys.argv[5]
-    solve_choice=np.int(sys.argv[6])
-    M=np.int(sys.argv[7])
+    solve_choice=np.int32(sys.argv[6])
+    M=np.int32(sys.argv[7])
 
-    W_w=np.float(sys.argv[8])
-    W_sparse=np.float(sys.argv[9])
-    W_spatial=np.float(sys.argv[10])
-    W_sm_K=np.float(sys.argv[11])
-    W_sm_S=np.float(sys.argv[12])
-    W_sm_KS=np.float(sys.argv[13])
+    W_w=np.float64(sys.argv[8])
+    W_sparse=np.float64(sys.argv[9])
+    W_spatial=np.float64(sys.argv[10])
+    W_sm_K=np.float64(sys.argv[11])
+    W_sm_S=np.float64(sys.argv[12])
+    W_sm_KS=np.float64(sys.argv[13])
 
     foldername=sys.argv[14]
     gt_H_name=sys.argv[15]
-    representative_color_choice=np.int(sys.argv[16])
-    choose_corresponding_existing_KS_RGB_color_choice=np.int(sys.argv[17])
-    max_loop=np.int(sys.argv[18])
-    sample_num=np.int(sys.argv[19])
-    data_term_choice1=np.int(sys.argv[20])
-    data_term_choice2=np.int(sys.argv[21])
+    representative_color_choice=np.int32(sys.argv[16])
+    choose_corresponding_existing_KS_RGB_color_choice=np.int32(sys.argv[17])
+    max_loop=np.int32(sys.argv[18])
+    sample_num=np.int32(sys.argv[19])
+    data_term_choice1=np.int32(sys.argv[20])
+    data_term_choice2=np.int32(sys.argv[21])
 
 
 
@@ -1489,11 +1483,11 @@ if __name__=="__main__":
     # W_sm_K, W_sm_S, W_sm_KS=np.array([0.005,0.05,1e-6])
     # # W_sm_K, W_sm_S, W_sm_KS=np.array([100.0,100.0,1.0])
     # # W_sm_K, W_sm_S, W_sm_KS=np.array([0.0,0.0,0.0])
-    print 'pigment num ', M
-    print 'W_w ', W_w
-    print 'W_sparse ',W_sparse
-    print 'W_spatial ',W_spatial
-    print W_sm_K, W_sm_S, W_sm_KS
+    print('pigment num ', M)
+    print('W_w ', W_w)
+    print('W_sparse ',W_sparse)
+    print('W_spatial ',W_spatial)
+    print(W_sm_K, W_sm_S, W_sm_KS)
 
 
     output_prefix=output_prefix+"-KS_choice-"+str(KS_choice)+"-solve_choice-"+str(solve_choice)+"-M-"+str(M)+"-representative_color_choice-"+str(representative_color_choice)+"-choose_corresponding_existing_KS_RGB_color_choice-"+str(choose_corresponding_existing_KS_RGB_color_choice)
@@ -1503,7 +1497,7 @@ if __name__=="__main__":
     # base_dir="/Users/jianchao/Documents/Research/Adobe_Jianchao/Brushstroke_Project/Adobe_inside/CODE/pigment-parameters-newVersion/new_pipeline_executable"
     base_dir = os.path.split( os.path.realpath(__file__) )[0]
     base_dir=base_dir+foldername+"/"
-    print base_dir
+    print(base_dir)
     output_prefix_copy=base_dir+output_prefix
     make_sure_path_exists(output_prefix_copy)
     output_prefix=output_prefix_copy+"/ANLS"
@@ -1518,7 +1512,7 @@ if __name__=="__main__":
 
 
     img=np.asarray(Image.open(base_dir+img_file).convert('RGB'))
-    print img.shape
+    print(img.shape)
 
     ###save for application folder:
     Image.fromarray(img).save(save_for_application_path_prefix+img_file)
@@ -1538,7 +1532,7 @@ if __name__=="__main__":
         arr=sample_RGBcolors_new_use_avg_color_in_each_bin(img.reshape((-1,3)))
 
 
-    # arr=arr.reshape((np.int(sqrt(sample_num)),np.int(sqrt(sample_num)),3))
+    # arr=arr.reshape((np.int32(sqrt(sample_num)),np.int32(sqrt(sample_num)),3))
     arr=arr.reshape((-1,1,3))
 
     Image.fromarray(arr).save(base_dir+"sampled_pixels-"+str(sample_num)+".png")
@@ -1560,7 +1554,7 @@ if __name__=="__main__":
 
     elif KS_choice==1 and KS_file_name!="None":
         H=np.loadtxt(base_dir+KS_file_name)
-        print H.shape
+        print(H.shape)
 
     elif KS_choice==2 and KS_file_name!="None":
 
@@ -1593,12 +1587,12 @@ if __name__=="__main__":
         if data_term_choice2==2:
             ### input is unique image data
             image_unique_colors=np.array(list(set(list(tuple(item) for item in img.reshape((-1,3))))))
-            print image_unique_colors.shape
+            print(image_unique_colors.shape)
             H, RGB_Colors,Hull_vertices=choose_good_initial_H_from_existing_H(img, image_unique_colors/255.0, Existing_H, M, representative_color_choice, choose_corresponding_existing_KS_RGB_color_choice, output_prefix_copy)
 
 
 
-        print H.shape
+        print(H.shape)
 
 
 
@@ -1615,7 +1609,7 @@ if __name__=="__main__":
         Image.fromarray( RGB_Colors.round().astype(np.uint8).reshape((1,-1,3)) ).save(output_prefix+"-choosed_good_initial_H_from_Existing_H-pigment_colors.png")
 
     else:
-        print "wrong KS choice!"
+        print("wrong KS choice!")
 
 
     original_shape=img.shape
@@ -1633,7 +1627,7 @@ if __name__=="__main__":
 
     else:
         extention=os.path.splitext(Weights_file_name)[1]
-        print extention
+        print(extention)
         if extention==".js":
             with open(base_dir+Weights_file_name) as data_file:    
                 W_js = json.load(data_file)
@@ -1643,7 +1637,7 @@ if __name__=="__main__":
             W=W.reshape((arr.shape[0],arr.shape[1],M))
 
 
-        for i in xrange(W.shape[-1]):
+        for i in range(W.shape[-1]):
             weights_map_name=output_prefix+"-initial-weights_map-%02d.png" % i
             Weights_map=W[:,:,i]
             Image.fromarray((Weights_map*255.0).clip(0,255).round().astype(np.uint8)).save(weights_map_name)
@@ -1651,7 +1645,7 @@ if __name__=="__main__":
         W=W.reshape((-1,W.shape[2]))
         N=W.shape[0]
         M=W.shape[1]
-        L=H.shape[1]/2
+        L=H.shape[1]//2
 
         x0=W.reshape(-1)
  
@@ -1663,7 +1657,7 @@ if __name__=="__main__":
     if solve_choice==0:
         recover_W, recover_H, final_loop = KM_solve_ANLS(arr, x0, H, output_prefix, max_loop, W_w, W_sparse, W_spatial, W_sm_K, W_sm_S, W_sm_KS)
         
-        print recover_H.shape
+        print(recover_H.shape)
         save_pigments(recover_H.reshape(-1), M, output_prefix+"-Pigments"+"-alternate_loop-"+str(final_loop)+"-")
         save_pigments(recover_H.reshape(-1), M, base_dir)
         save_results(recover_W.reshape(-1), arr, recover_H, output_prefix+"-Weights"+"-alternate_loop-"+str(final_loop)+"-")
@@ -1676,7 +1670,7 @@ if __name__=="__main__":
 
 
     END=time.time()
-    print 'total time: ', (END-START)
+    print('total time: ', (END-START))
     
 
     
