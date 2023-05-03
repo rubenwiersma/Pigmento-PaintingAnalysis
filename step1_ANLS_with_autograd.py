@@ -895,16 +895,15 @@ def choose_good_initial_H_from_existing_H(image, arr, Existing_H, M, representat
         hull=ConvexHull(data)
         write_convexhull_into_obj_file(hull, output_rawhull_obj_file)
         N=500
-        vertices = hull.points[hull.vertices]
-        hull_to_vertex_idx = np.zeros(hull.points.shape[0], dtype=np.int32)
-        hull_to_vertex_idx[hull.vertices] = np.arange(len(hull.vertices))
-        faces = hull_to_vertex_idx[hull.simplices]
-        mesh = Mesh(vertices, faces)
+        mesh=TriMesh.FromOBJ_FileName(output_rawhull_obj_file)
         for i in range(N):
-            mesh=edge_contract_smallest_added_volume(mesh)
-            newhull=ConvexHull(mesh.vertices)
+            old_num=len(mesh.vs)
+            mesh=TriMesh.FromOBJ_FileName(output_rawhull_obj_file)
+            mesh=remove_one_edge_by_finding_smallest_adding_volume_with_test_conditions(mesh,option=2)
+            newhull=ConvexHull(mesh.vs)
+            write_convexhull_into_obj_file(newhull, output_rawhull_obj_file)
 
-            if len(mesh.vertices)==M:
+            if len(mesh.vs)==M:
                 Final_hull=newhull
                 break
 
