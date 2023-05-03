@@ -7,14 +7,13 @@ This code implements the pipeline described in the IEEE TVCG 2018 paper ["Pigmen
 * The flower image is from [Nel Jansen](https://nelseverydaypainting.blogspot.com/2011/04/dogwood-in-hood.html#links).
 
 #### Dependencies:
- * Python 2.7
+ * Python 3.9
  * Numpy
  * Scipy
  * Pillow
  * numba
  * matplotlib
  * autograd
- * joblib
  * scikit-image
  * scikit-learn
  * cvxopt (with 'glpk' solver option)
